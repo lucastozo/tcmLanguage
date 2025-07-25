@@ -1,7 +1,12 @@
 class Interpreter
 {
     private VirtualMachine vm;
-    private const byte RAM_ADDRESS_CONTROLLER = 4; // REG4 controls the address of RAM
+    private const byte RAM_ADDRESS_CONTROLLER = 5; // REG5 controls the address of RAM
+
+    public Interpreter(VirtualMachine vm)
+    {
+        this.vm = vm;
+    }
 
     private enum ArgumentMode
     {
@@ -9,11 +14,6 @@ class Interpreter
         Arg1Only = 1, // ARG1 is literal (ARG2 is variable)
         Arg2Only = 2, // ARG2 is literal (ARG1 is variable)
         BothArgs = 3 // Both ARG1 and ARG2 are literals
-    }
-
-    public Interpreter(VirtualMachine vm)
-    {
-        this.vm = vm;
     }
 
     private ArgumentMode GetArgumentMode(byte opcode)
@@ -51,7 +51,7 @@ class Interpreter
     {
         // Use when "variables" are mentioned in destination (last byte)
 
-        if (variableCode <= VirtualMachine.MAX_REGISTERS)
+        if (variableCode < VirtualMachine.MAX_REGISTERS)
         {
             vm.Registers[variableCode] = value;
         }
@@ -66,6 +66,10 @@ class Interpreter
         else if (variableCode == Keywords.list["RAM"])
         {
             vm.RAM[vm.Registers[RAM_ADDRESS_CONTROLLER]] = value;
+        }
+        else if (variableCode == Keywords.list["COUNTER"])
+        {
+            vm.IP = value;
         }
     }
 
@@ -98,7 +102,7 @@ class Interpreter
 
     public void Run(List<Instruction> program)
     {
-        Console.WriteLine("PROGRAM:");
+        Console.WriteLine("SIMULATED PROGRAM:");
         foreach (Instruction instruction in program)
         {
             Console.WriteLine($"{instruction.Opcode} {instruction.Arg1} {instruction.Arg2} {instruction.Destination}");
@@ -108,66 +112,74 @@ class Interpreter
         while (vm.IP < program.Count)
         {
             vm.PrintState();
-            Console.WriteLine($"Executing instruction: {program[vm.IP].Opcode} {program[vm.IP].Arg1} {program[vm.IP].Arg2} {program[vm.IP].Destination}");
+            string instruction = $"{program[vm.IP].Opcode} {program[vm.IP].Arg1} {program[vm.IP].Arg2} {program[vm.IP].Destination}";
+            Console.WriteLine($"Executing instruction: {instruction}");
             bool ipWasChanged = Execute(program[vm.IP]);
-            if (ipWasChanged) continue; // If Instruction Pointer was changed because of a goto
-            vm.IP++;
+            Console.WriteLine($"Instruction {instruction} was executed");
+            Console.WriteLine("-------------------------------");
+            Thread.Sleep(1000);
+            if (!ipWasChanged) vm.IP++; // If Instruction Pointer was changed because of a goto
         }
         vm.PrintState();
+        Console.WriteLine("-- END OF SIMULATED PROGRAM --");
     }
 
     private bool Execute(Instruction instr)
     {
+        Instruction workingInstr = new Instruction(instr.Opcode, instr.Arg1, instr.Arg2, instr.Destination);
+        
         // Change the value of arguments in case they are actually "variables"
-        ResolveArguments(instr);
+        ResolveArguments(workingInstr);
 
-        // Down opcode to non immediate modes
-        instr.Opcode = (byte)(instr.Opcode & 0b00111111); // removes the 2 most significant bytes
-
+        // Extract the operation code without modifying the original instruction
+        byte baseOpcode = (byte)(workingInstr.Opcode & 0b00111111); // removes the 2 most significant bits
+        
         // Get result from OPCODE
-        byte result = instr.Opcode switch
+        byte result = baseOpcode switch
         {
-            Opcodes.ADD => (byte)(instr.Arg1 + instr.Arg2),
-            Opcodes.SUB => (byte)(instr.Arg1 - instr.Arg2),
-            Opcodes.AND => (byte)(instr.Arg1 & instr.Arg2),
-            Opcodes.OR => (byte)(instr.Arg1 | instr.Arg2),
-            Opcodes.NOT_A => (byte)~instr.Arg1,
-            Opcodes.XOR => (byte)(instr.Arg1 ^ instr.Arg2),
-            Opcodes.MULTIPLY => (byte)(instr.Arg1 * instr.Arg2),
-            Opcodes.DIV => (byte)(instr.Arg1 / instr.Arg2),
-            Opcodes.MOD => (byte)(instr.Arg1 % instr.Arg2),
-            Opcodes.SHL => (byte)(instr.Arg1 << instr.Arg2),
-            Opcodes.SHR => (byte)(instr.Arg1 >> instr.Arg2),
-            Opcodes.ASHR => (byte)(((sbyte)instr.Arg1) >> instr.Arg2),
-            Opcodes.ROL => (byte)((instr.Arg1 << instr.Arg2) | (instr.Arg1 >> (8 - instr.Arg2))),
-            Opcodes.ROR => (byte)((instr.Arg1 >> instr.Arg2) | (instr.Arg1 << (8 - instr.Arg2))),
-            Opcodes.IF_EQL => (byte)(instr.Arg1 == instr.Arg2 ? 1 : 0),
-            Opcodes.IF_NEQ => (byte)(instr.Arg1 != instr.Arg2 ? 1 : 0),
-            Opcodes.IF_LES => (byte)(instr.Arg1 < instr.Arg2 ? 1 : 0),
-            Opcodes.IF_LOE => (byte)(instr.Arg1 <= instr.Arg2 ? 1 : 0),
-            Opcodes.IF_GRT => (byte)(instr.Arg1 > instr.Arg2 ? 1 : 0),
-            Opcodes.IF_GOE => (byte)(instr.Arg1 >= instr.Arg2 ? 1 : 0),
-            _ => throw new NotImplementedException()
+            Opcodes.ADD => (byte)(workingInstr.Arg1 + workingInstr.Arg2),
+            Opcodes.SUB => (byte)(workingInstr.Arg1 - workingInstr.Arg2),
+            Opcodes.AND => (byte)(workingInstr.Arg1 & workingInstr.Arg2),
+            Opcodes.OR => (byte)(workingInstr.Arg1 | workingInstr.Arg2),
+            Opcodes.NOT_A => (byte)~workingInstr.Arg1,
+            Opcodes.XOR => (byte)(workingInstr.Arg1 ^ workingInstr.Arg2),
+            Opcodes.MULTIPLY => (byte)(workingInstr.Arg1 * workingInstr.Arg2),
+            Opcodes.DIV => (byte)(workingInstr.Arg1 / workingInstr.Arg2),
+            Opcodes.MOD => (byte)(workingInstr.Arg1 % workingInstr.Arg2),
+            Opcodes.SHL => (byte)(workingInstr.Arg1 << workingInstr.Arg2),
+            Opcodes.SHR => (byte)(workingInstr.Arg1 >> workingInstr.Arg2),
+            Opcodes.ASHR => (byte)(((sbyte)workingInstr.Arg1) >> workingInstr.Arg2),
+            Opcodes.ROL => (byte)((workingInstr.Arg1 << workingInstr.Arg2) | (workingInstr.Arg1 >> (8 - workingInstr.Arg2))),
+            Opcodes.ROR => (byte)((workingInstr.Arg1 >> workingInstr.Arg2) | (workingInstr.Arg1 << (8 - workingInstr.Arg2))),
+            Opcodes.IF_EQL => (byte)(workingInstr.Arg1 == workingInstr.Arg2 ? 1 : 0),
+            Opcodes.IF_NEQ => (byte)(workingInstr.Arg1 != workingInstr.Arg2 ? 1 : 0),
+            Opcodes.IF_LES => (byte)(workingInstr.Arg1 < workingInstr.Arg2 ? 1 : 0),
+            Opcodes.IF_LOE => (byte)(workingInstr.Arg1 <= workingInstr.Arg2 ? 1 : 0),
+            Opcodes.IF_GRT => (byte)(workingInstr.Arg1 > workingInstr.Arg2 ? 1 : 0),
+            Opcodes.IF_GOE => (byte)(workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0),
+            _ => throw new NotImplementedException($"Opcode {baseOpcode} not implemented")
         };
 
-        if (OpcodeIsConditional(instr.Opcode))
+        if (OpcodeIsConditional(baseOpcode))
         {
-            if (result == 0) return false; // Conditional was not meet
+            if (result == 0) return false; // Conditional was not met
 
-            // CALL NOW SUBROUTINE label ?
-            bool isSubroutineCall = instr.Opcode == Opcodes.IF_LES && instr.Arg1 == Keywords.list["NOW"] && instr.Arg2 == Keywords.list["SUBROUTINE"];
+            // CALL NOW SUBROUTINE label?
+            bool isSubroutineCall = workingInstr.Opcode == Keywords.list["CALL"] && 
+                                workingInstr.Arg1 == Keywords.list["NOW"] && 
+                                workingInstr.Arg2 == Keywords.list["SUBROUTINE"];
             if (isSubroutineCall)
             {
-                vm.CallStack.Push((byte)(instr.Destination / 4));
+                vm.CallStack.Push(vm.IP);
             }
 
-            vm.IP = (byte)(instr.Destination / 4);
+            vm.IP = (byte)(workingInstr.Destination / 4);
             return true;
         }
 
-        SetVariable(instr.Destination, result);
+        SetVariable(workingInstr.Destination, result);
 
-        if (instr.Destination == Keywords.list["OUTPUT"])
+        if (workingInstr.Destination == Keywords.list["OUTPUT"])
         {
             Console.WriteLine(vm.Output);
         }

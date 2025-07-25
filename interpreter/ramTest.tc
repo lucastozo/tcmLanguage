@@ -1,0 +1,7 @@
+# Program to fill ram to test if its working in the interpreter
+COPY_CONST 255 TO REG1
+label lab_loop
+COPY_CONST 255 TO RAM
+NEXT ADDRESS IN MEMORY
+NEXT REG0 IN REG0
+IF_LES REG0 REG1 lab_loop

@@ -1,7 +1,7 @@
 class VirtualMachine
 {
     public const int MAX_RAM = 256;
-    public const int MAX_REGISTERS = 6;
+    public const int MAX_REGISTERS = 6; // REG0 - REG5 
 
     public byte[] RAM { get; } = new byte[MAX_RAM];
     public byte[] Registers { get; } = new byte[MAX_REGISTERS];
@@ -24,6 +24,13 @@ class VirtualMachine
             }
             Console.WriteLine();
         }
+
+        Console.WriteLine($"\nSTACK:");
+        for (int i = 0; i < CallStack.Count; i++)
+        {
+            Console.WriteLine($"Item {i} of the stack: {CallStack.ElementAt(i)}");
+        }
+        if (CallStack.Count == 0) Console.WriteLine("No elements in stack");
 
         Console.WriteLine("\nRegisters:");
         for (int i = 0; i < MAX_REGISTERS; i++)
