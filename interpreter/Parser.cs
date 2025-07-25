@@ -2,6 +2,8 @@ class Parser
 {
     public static List<Instruction> GetInstructions(string pathToFile)
     {
+        Log.PrintMessage("[PARSER] initiating");
+
         Dictionary<string, byte> constants = new Dictionary<string, byte>();
         Dictionary<string, int> labels = new Dictionary<string, int>();
         List<string> rawInstructionLines = new List<string>();
@@ -55,6 +57,7 @@ class Parser
             }
 
             rawInstructionLines.Add(line);
+            Log.PrintMessage($"Line {line} preprocessed sucessfully");
             instructionIndex++;
         }
 
@@ -80,6 +83,16 @@ class Parser
             instructions.Add(new Instruction(bParts[0], bParts[1], bParts[2], bParts[3]));
         }
 
+        if (Log.ShowLogs)
+        {
+            string programMsg = "Final program:\n";
+            foreach (Instruction instr in instructions)
+            {
+                programMsg += $"{instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}\n";
+            }
+            Log.PrintMessage(programMsg);
+        }
+
         return instructions;
     }
 
@@ -94,11 +107,11 @@ class Parser
                 string binaryPart = expression.Substring(2);
                 if (binaryPart.Length != 8)
                 {
-                    throw new Exception($"Binary value must have exactly 8 bits, got {binaryPart.Length}");
+                    throw new Exception($"Binary value must have exactly 8 bits, got {binaryPart.Length} at line {lineNumber}");
                 }
                 if (!binaryPart.All(c => c == '0' || c == '1'))
                 {
-                    throw new Exception("Binary value can only contain 0 and 1");
+                    throw new Exception($"Binary value can only contain 0 and 1 at line {lineNumber}");
                 }
                 return Convert.ToByte(binaryPart, 2);
             }
@@ -106,7 +119,7 @@ class Parser
             if (expression.All(char.IsDigit))
             {
                 int v = int.Parse(expression);
-                if (v < 0 || v > 255) throw new Exception($"Value {v} out of byte range");
+                if (v < 0 || v > 255) throw new Exception($"Value {v} out of byte range at line {lineNumber}");
                 return (byte)v;
             }
 
@@ -130,7 +143,7 @@ class Parser
                 return (byte)ParseExpression(expression, constants, labels);
             }
 
-            throw new Exception($"Unknown token '{expression}'");
+            throw new Exception($"Unknown token '{expression}' at line {lineNumber}");
         }
         catch (Exception ex) when (!(ex.Message.StartsWith("Unknown token") || ex.Message.StartsWith("Value")))
         {
@@ -152,6 +165,7 @@ class Parser
         // 1. Multiplication (*), Division (/), Modulo (%)
         // 2. Addition (+), Subtraction (-)
         // 3. Bitwise operations (|, ^, &)
+        System.Console.WriteLine(expression);
 
         if (expression.Contains('|'))
         {

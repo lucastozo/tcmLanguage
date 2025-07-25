@@ -47,30 +47,36 @@ class Interpreter
         return 0;
     }
 
-    private void SetVariable(byte variableCode, byte value)
+    private string? SetVariable(byte variableCode, byte value)
     {
         // Use when "variables" are mentioned in destination (last byte)
 
         if (variableCode < VirtualMachine.MAX_REGISTERS)
         {
             vm.Registers[variableCode] = value;
+            return $"REG{variableCode}";
         }
-        else if (variableCode == Keywords.list["OUTPUT"])
+        if (variableCode == Keywords.list["OUTPUT"])
         {
             vm.Output = value;
+            return "OUTPUT";
         }
-        else if (variableCode == Keywords.list["STACK"])
+        if (variableCode == Keywords.list["STACK"])
         {
             vm.CallStack.Push(value);
+            return "STACK";
         }
-        else if (variableCode == Keywords.list["RAM"])
+        if (variableCode == Keywords.list["RAM"])
         {
             vm.RAM[vm.Registers[RAM_ADDRESS_CONTROLLER]] = value;
+            return "RAM";
         }
-        else if (variableCode == Keywords.list["COUNTER"])
+        if (variableCode == Keywords.list["COUNTER"])
         {
             vm.IP = value;
+            return "COUNTER";
         }
+        return null;
     }
 
     private bool OpcodeIsConditional(byte opcode)
@@ -102,36 +108,31 @@ class Interpreter
 
     public void Run(List<Instruction> program)
     {
-        Console.WriteLine("SIMULATED PROGRAM:");
-        foreach (Instruction instruction in program)
-        {
-            Console.WriteLine($"{instruction.Opcode} {instruction.Arg1} {instruction.Arg2} {instruction.Destination}");
-        }
-        Console.WriteLine();
-
+        Log.PrintMessage("[INTERPRETER] initiating simulated program");
         while (vm.IP < program.Count)
         {
             vm.PrintState();
-            string instruction = $"{program[vm.IP].Opcode} {program[vm.IP].Arg1} {program[vm.IP].Arg2} {program[vm.IP].Destination}";
-            Console.WriteLine($"Executing instruction: {instruction}");
             bool ipWasChanged = Execute(program[vm.IP]);
-            Console.WriteLine($"Instruction {instruction} was executed");
-            Console.WriteLine("-------------------------------");
+            Log.PrintMessage("-------------------------------");
             if (!ipWasChanged) vm.IP++; // If Instruction Pointer was changed because of a goto
         }
         vm.PrintState();
-        Console.WriteLine("-- END OF SIMULATED PROGRAM --");
+        Log.PrintMessage("-- END OF SIMULATED PROGRAM --");
     }
 
     private bool Execute(Instruction instr)
     {
+        Log.PrintMessage($"Executing instruction: {instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}");
+        
         Instruction workingInstr = new Instruction(instr.Opcode, instr.Arg1, instr.Arg2, instr.Destination);
         
         // Change the value of arguments in case they are actually "variables"
         ResolveArguments(workingInstr);
+        Log.PrintMessage($"Arguments of instruction changed to: {workingInstr.Arg1} {workingInstr.Arg2}");
 
         // Extract the operation code without modifying the original instruction
         byte baseOpcode = (byte)(workingInstr.Opcode & 0b00111111); // removes the 2 most significant bits
+        Log.PrintMessage($"Opcode decoded to: {baseOpcode}");
         
         // Get result from OPCODE
         byte result = baseOpcode switch
@@ -158,30 +159,39 @@ class Interpreter
             Opcodes.IF_GOE => (byte)(workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0),
             _ => throw new NotImplementedException($"Opcode {baseOpcode} not implemented")
         };
+        
+        Log.PrintMessage($"Result of ALU: {result}");
 
         if (OpcodeIsConditional(baseOpcode))
         {
+            Log.PrintMessage("Conditional detected");
             if (result == 0) return false; // Conditional was not met
 
             // CALL NOW SUBROUTINE label?
-            bool isSubroutineCall = workingInstr.Opcode == Keywords.list["CALL"] && 
-                                workingInstr.Arg1 == Keywords.list["NOW"] && 
+            bool isSubroutineCall = workingInstr.Opcode == Keywords.list["CALL"] &&
+                                workingInstr.Arg1 == Keywords.list["NOW"] &&
                                 workingInstr.Arg2 == Keywords.list["SUBROUTINE"];
             if (isSubroutineCall)
             {
+                Log.PrintMessage("Subroutine call detected");
                 vm.CallStack.Push(vm.IP);
+                Log.PrintMessage($"Value {vm.IP} pushed to stack");
             }
 
             vm.IP = (byte)(workingInstr.Destination / 4);
+            Log.PrintMessage($"Value {vm.IP} moved to Instruction Pointer");
             return true;
         }
 
-        SetVariable(workingInstr.Destination, result);
+        string? variableChanged = SetVariable(workingInstr.Destination, result);
+        Log.PrintMessage($"Variable {variableChanged} received value {result}");
 
         if (workingInstr.Destination == Keywords.list["OUTPUT"])
         {
             Console.WriteLine(vm.Output);
         }
+
+        Log.PrintMessage("Instruction executed");
 
         return false;
     }

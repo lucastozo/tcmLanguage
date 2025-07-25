@@ -12,32 +12,37 @@ class VirtualMachine
 
     public void PrintState()
     {
-        Console.WriteLine($"Instruction Pointer: {IP}");
+        Log.PrintMessage($"Printing current state of virtual machine...");
 
-        Console.WriteLine($"\nRAM:");
+        Log.PrintMessage($"Instruction Pointer: {IP}");
+
+        string ramState = "\nRAM:\n";
         for (int row = 0; row < MAX_RAM / 32; row++)
         {
             for (int col = 0; col < MAX_RAM / 8; col++)
             {
                 int index = row * MAX_RAM / 8 + col;
-                Console.Write($"{RAM[index]:X2} "); // Hex format, 2-digit
+                ramState += $"{RAM[index]:X2} "; // Hex format, 2-digit
             }
-            Console.WriteLine();
+            ramState += "\n";
         }
+        Log.PrintMessage(ramState);
 
-        Console.WriteLine($"\nSTACK:");
+        string stackState = "\nSTACK:\n";
         for (int i = 0; i < CallStack.Count; i++)
         {
-            Console.WriteLine($"Item {i} of the stack: {CallStack.ElementAt(i)}");
+            stackState += $"Item {i} of the stack: {CallStack.ElementAt(i)}\n";
         }
-        if (CallStack.Count == 0) Console.WriteLine("No elements in stack");
-
-        Console.WriteLine("\nRegisters:");
+        if (CallStack.Count == 0) stackState += "No elements in stack\n";
+        Log.PrintMessage(stackState);
+        
+        string registersState = "\nREGISTERS:\n";
         for (int i = 0; i < MAX_REGISTERS; i++)
         {
-            Console.WriteLine($"REG{i} = {Registers[i]}");
+            registersState += $"REG{i} = {Registers[i]}\n";
         }
+        Log.PrintMessage(registersState);
         
-        Console.WriteLine();
+        Log.PrintMessage();
     }
 }
