@@ -1,4 +1,4 @@
-﻿const string pathToFile = "smallTest.tc";
+﻿const string pathToFile = "fibonacci.tc";
 VirtualMachine vm = new VirtualMachine();
 Interpreter i = new Interpreter(vm);
 List<Instruction> instructions = Parser.GetInstructions(pathToFile);

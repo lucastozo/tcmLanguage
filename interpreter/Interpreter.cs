@@ -117,7 +117,6 @@ class Interpreter
             bool ipWasChanged = Execute(program[vm.IP]);
             Console.WriteLine($"Instruction {instruction} was executed");
             Console.WriteLine("-------------------------------");
-            Thread.Sleep(1000);
             if (!ipWasChanged) vm.IP++; // If Instruction Pointer was changed because of a goto
         }
         vm.PrintState();

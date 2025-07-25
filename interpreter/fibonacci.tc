@@ -3,7 +3,7 @@
 # Each instruction must follow the structure [OPCODE] [ARG1] [ARG2] [DESTINATION]
 # Everything after the '#' character in a line represents a comment and must be ignored
 
-const N 0 # Define limit
+const N 8 # Define limit
 COPY_CONST 1 TO REG1 # REG1 = 1
 COPY_CONST N TO REG4 # REG4 = N
 

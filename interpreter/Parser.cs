@@ -68,28 +68,8 @@ class Parser
 
             foreach (var part in parts)
             {
-                if (part.All(char.IsDigit))
-                {
-                    int v = int.Parse(part);
-                    if (v < 0 || v > 255) throw new Exception($"Value {v} out of byte range at instruction {i + 1}");
-                    bParts.Add((byte)v);
-                }
-                else if (constants.TryGetValue(part, out byte constVal))
-                {
-                    bParts.Add(constVal);
-                }
-                else if (labels.TryGetValue(part, out int labelAddr))
-                {
-                    bParts.Add((byte)labelAddr);
-                }
-                else if (Keywords.list.TryGetValue(part, out byte kwVal))
-                {
-                    bParts.Add(kwVal);
-                }
-                else
-                {
-                    throw new Exception($"Unknown token '{part}' at instruction {i + 1}");
-                }
+                byte value = EvaluateExpression(part, constants, labels, i + 1);
+                bParts.Add(value);
             }
 
             if (bParts.Count != 4)
@@ -101,5 +81,143 @@ class Parser
         }
 
         return instructions;
+    }
+
+    private static byte EvaluateExpression(string expression, Dictionary<string, byte> constants, 
+                                         Dictionary<string, int> labels, int lineNumber)
+    {
+        try
+        {
+            // Check if binary value
+            if (expression.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
+            {
+                string binaryPart = expression.Substring(2);
+                if (binaryPart.Length != 8)
+                {
+                    throw new Exception($"Binary value must have exactly 8 bits, got {binaryPart.Length}");
+                }
+                if (!binaryPart.All(c => c == '0' || c == '1'))
+                {
+                    throw new Exception("Binary value can only contain 0 and 1");
+                }
+                return Convert.ToByte(binaryPart, 2);
+            }
+
+            if (expression.All(char.IsDigit))
+            {
+                int v = int.Parse(expression);
+                if (v < 0 || v > 255) throw new Exception($"Value {v} out of byte range");
+                return (byte)v;
+            }
+
+            if (constants.TryGetValue(expression, out byte constVal))
+            {
+                return constVal;
+            }
+
+            if (labels.TryGetValue(expression, out int labelAddr))
+            {
+                return (byte)labelAddr;
+            }
+
+            if (Keywords.list.TryGetValue(expression, out byte kwVal))
+            {
+                return kwVal;
+            }
+
+            if (ContainsOperators(expression))
+            {
+                return (byte)ParseExpression(expression, constants, labels);
+            }
+
+            throw new Exception($"Unknown token '{expression}'");
+        }
+        catch (Exception ex) when (!(ex.Message.StartsWith("Unknown token") || ex.Message.StartsWith("Value")))
+        {
+            throw new Exception($"Error evaluating expression '{expression}' at line {lineNumber}: {ex.Message}");
+        }
+    }
+
+    private static bool ContainsOperators(string expression)
+    {
+        return expression.Contains('|') || expression.Contains('+') || expression.Contains('-') || 
+               expression.Contains('*') || expression.Contains('/') || expression.Contains('%') ||
+               expression.Contains('^') || expression.Contains('&');
+    }
+
+    private static int ParseExpression(string expression, Dictionary<string, byte> constants, 
+                                     Dictionary<string, int> labels)
+    {
+        // Handle operators
+        // 1. Multiplication (*), Division (/), Modulo (%)
+        // 2. Addition (+), Subtraction (-)
+        // 3. Bitwise operations (|, ^, &)
+
+        if (expression.Contains('|'))
+        {
+            return ParseBinaryOperation(expression, '|', constants, labels, (a, b) => a | b);
+        }
+        if (expression.Contains('^'))
+        {
+            return ParseBinaryOperation(expression, '^', constants, labels, (a, b) => a ^ b);
+        }
+        if (expression.Contains('&'))
+        {
+            return ParseBinaryOperation(expression, '&', constants, labels, (a, b) => a & b);
+        }
+
+        if (expression.Contains('+'))
+        {
+            return ParseBinaryOperation(expression, '+', constants, labels, (a, b) => a + b);
+        }
+        if (expression.Contains('-'))
+        {
+            return ParseBinaryOperation(expression, '-', constants, labels, (a, b) => a - b);
+        }
+
+        if (expression.Contains('*'))
+        {
+            return ParseBinaryOperation(expression, '*', constants, labels, (a, b) => a * b);
+        }
+        if (expression.Contains('/'))
+        {
+            return ParseBinaryOperation(expression, '/', constants, labels, (a, b) => {
+                if (b == 0) throw new Exception("Division by zero");
+                return a / b;
+            });
+        }
+        if (expression.Contains('%'))
+        {
+            return ParseBinaryOperation(expression, '%', constants, labels, (a, b) => {
+                if (b == 0) throw new Exception("Modulo by zero");
+                return a % b;
+            });
+        }
+
+        throw new Exception($"Invalid expression '{expression}'");
+    }
+
+    private static int ParseBinaryOperation(string expression, char op, Dictionary<string, byte> constants, 
+                                          Dictionary<string, int> labels, Func<int, int, int> operation)
+    {
+        // Find the rightmost occurrence of the operator to handle left-to-right evaluation
+        int opIndex = expression.LastIndexOf(op);
+        if (opIndex == -1) return ParseExpression(expression, constants, labels);
+
+        string left = expression.Substring(0, opIndex);
+        string right = expression.Substring(opIndex + 1);
+
+        int leftVal = ParseExpression(left, constants, labels);
+        int rightVal = ParseExpression(right, constants, labels);
+
+        int result = operation(leftVal, rightVal);
+        
+        // Ensure result fits in byte range
+        if (result < 0 || result > 255)
+        {
+            throw new Exception($"Expression result {result} out of byte range (0-255)");
+        }
+
+        return result;
     }
 }
