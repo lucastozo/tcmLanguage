@@ -102,6 +102,11 @@ class Parser
         try
         {
             // Check if binary value
+            if (ContainsOperators(expression))
+            {
+                return (byte)ParseExpression(expression, constants, labels);
+            }
+            
             if (expression.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
             {
                 string binaryPart = expression.Substring(2);
@@ -136,11 +141,6 @@ class Parser
             if (Keywords.list.TryGetValue(expression, out byte kwVal))
             {
                 return kwVal;
-            }
-
-            if (ContainsOperators(expression))
-            {
-                return (byte)ParseExpression(expression, constants, labels);
             }
 
             throw new Exception($"Unknown token '{expression}' at line {lineNumber}");
@@ -218,11 +218,11 @@ class Parser
         int opIndex = expression.LastIndexOf(op);
         if (opIndex == -1) return ParseExpression(expression, constants, labels);
 
-        string left = expression.Substring(0, opIndex);
-        string right = expression.Substring(opIndex + 1);
+        string left = expression.Substring(0, opIndex).Trim();
+        string right = expression.Substring(opIndex + 1).Trim();
 
-        int leftVal = ParseExpression(left, constants, labels);
-        int rightVal = ParseExpression(right, constants, labels);
+        int leftVal = EvaluateExpression(left, constants, labels, 0);
+        int rightVal = EvaluateExpression(right, constants, labels, 0);
 
         int result = operation(leftVal, rightVal);
         
