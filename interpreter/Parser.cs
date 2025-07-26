@@ -57,10 +57,10 @@ class Parser
                     throw new Exception("Program exceeds maximum addressable memory of 256 bytes.");
                 }
                 labels.Add(parts[1], instructionIndex * 4);
-                
+
                 continue;
             }
-            
+
             if (parts[0].Equals("subroutine", StringComparison.OrdinalIgnoreCase))
             {
                 if (parts.Length != 2) throw new Exception($"Invalid subroutine declaration at line {i + 1}");
@@ -97,9 +97,22 @@ class Parser
                 bParts.Add(value);
             }
 
-            if (bParts.Count != 4)
+            if (bParts.Count == 1)
             {
-                throw new Exception($"Invalid instruction at line {i + 1}: must have exactly 4 operands");
+                byte opcode = bParts[0];
+
+                if (opcode >= Opcodes.SYSTEM_INSTRUCTION_START)
+                {
+                    bParts.AddRange([0, 0, 0]); // Dummy values
+                }
+                else
+                {
+                    throw new Exception($"Invalid instruction at line {i + 1}: not a valid zero-operand instruction");
+                }
+            }
+            else if (bParts.Count != 4)
+            {
+                throw new Exception($"Invalid instruction at line {i + 1}: must have exactly 4 operands or be a valid zero-operand instruction");
             }
 
             instructions.Add(new Instruction(bParts[0], bParts[1], bParts[2], bParts[3]));
@@ -118,8 +131,8 @@ class Parser
         return instructions;
     }
 
-    private static byte EvaluateExpression(string expression, Dictionary<string, byte> constants, 
-                                         Dictionary<string, int> labels, Dictionary<string, int> subroutines, 
+    private static byte EvaluateExpression(string expression, Dictionary<string, byte> constants,
+                                         Dictionary<string, int> labels, Dictionary<string, int> subroutines,
                                          int lineNumber)
     {
         try
@@ -128,7 +141,7 @@ class Parser
             {
                 return (byte)ParseExpression(expression, constants, labels, subroutines);
             }
-            
+
             if (expression.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
             {
                 string binaryPart = expression.Substring(2);
@@ -180,12 +193,12 @@ class Parser
 
     private static bool ContainsOperators(string expression)
     {
-        return expression.Contains('|') || expression.Contains('+') || expression.Contains('-') || 
+        return expression.Contains('|') || expression.Contains('+') || expression.Contains('-') ||
                expression.Contains('*') || expression.Contains('/') || expression.Contains('%') ||
                expression.Contains('^') || expression.Contains('&');
     }
 
-    private static int ParseExpression(string expression, Dictionary<string, byte> constants, 
+    private static int ParseExpression(string expression, Dictionary<string, byte> constants,
                                      Dictionary<string, int> labels, Dictionary<string, int> subroutines)
     {
         // Handle operators
@@ -221,14 +234,16 @@ class Parser
         }
         if (expression.Contains('/'))
         {
-            return ParseBinaryOperation(expression, '/', constants, labels, subroutines, (a, b) => {
+            return ParseBinaryOperation(expression, '/', constants, labels, subroutines, (a, b) =>
+            {
                 if (b == 0) throw new Exception("Division by zero");
                 return a / b;
             });
         }
         if (expression.Contains('%'))
         {
-            return ParseBinaryOperation(expression, '%', constants, labels, subroutines, (a, b) => {
+            return ParseBinaryOperation(expression, '%', constants, labels, subroutines, (a, b) =>
+            {
                 if (b == 0) throw new Exception("Modulo by zero");
                 return a % b;
             });
@@ -237,8 +252,8 @@ class Parser
         throw new Exception($"Invalid expression '{expression}'");
     }
 
-    private static int ParseBinaryOperation(string expression, char op, Dictionary<string, byte> constants, 
-                                          Dictionary<string, int> labels, Dictionary<string, int> subroutines, 
+    private static int ParseBinaryOperation(string expression, char op, Dictionary<string, byte> constants,
+                                          Dictionary<string, int> labels, Dictionary<string, int> subroutines,
                                           Func<int, int, int> operation)
     {
         // Find the rightmost occurrence of the operator to handle left-to-right evaluation

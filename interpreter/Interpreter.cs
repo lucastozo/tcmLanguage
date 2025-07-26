@@ -114,12 +114,19 @@ class Interpreter
     public void Run(List<Instruction> program)
     {
         Log.PrintMessage("[INTERPRETER] initiating simulated program");
-        while (vm.IP < program.Count)
+        try
         {
-            vm.PrintState();
-            bool ipWasChanged = Execute(program[vm.IP]);
-            Log.PrintMessage("-------------------------------");
-            if (!ipWasChanged) vm.IP++; // If Instruction Pointer was changed because of a goto, dont tamper it
+            while (vm.IP < program.Count)
+            {
+                vm.PrintState();
+                bool ipWasChanged = Execute(program[vm.IP]);
+                Log.PrintMessage("-------------------------------");
+                if (!ipWasChanged) vm.IP++;
+            }
+        }
+        catch (ProgramHaltException)
+        {
+            Log.PrintMessage("[INTERPRETER] Program halted by HALT instruction");
         }
         vm.PrintState();
         Log.PrintMessage("-- END OF SIMULATED PROGRAM --");
@@ -128,9 +135,15 @@ class Interpreter
     private bool Execute(Instruction instr)
     {
         Log.PrintMessage($"Executing instruction: {instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}");
-        
+
+        // Handle system instructions before masking
+        if (instr.Opcode >= Opcodes.SYSTEM_INSTRUCTION_START) // System instruction range
+        {
+            return ExecuteSystemInstruction(instr);
+        }
+
         Instruction workingInstr = new Instruction(instr.Opcode, instr.Arg1, instr.Arg2, instr.Destination);
-        
+
         // Change the value of arguments in case they are actually "variables"
         ResolveArguments(workingInstr);
         Log.PrintMessage($"Arguments of instruction changed to: {workingInstr.Arg1} {workingInstr.Arg2}");
@@ -161,9 +174,10 @@ class Interpreter
             Opcodes.IF_LOE => (byte)(workingInstr.Arg1 <= workingInstr.Arg2 ? 1 : 0),
             Opcodes.IF_GRT => (byte)(workingInstr.Arg1 > workingInstr.Arg2 ? 1 : 0),
             Opcodes.IF_GOE => (byte)(workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0),
+            Opcodes.HALT => throw new ProgramHaltException(),
             _ => throw new NotImplementedException($"Opcode {baseOpcode} not implemented")
         };
-        
+
         Log.PrintMessage($"Result of ALU: {result}");
 
         if (OpcodeIsConditional(baseOpcode))
@@ -189,7 +203,7 @@ class Interpreter
                 {
                     Log.PrintMessage("Conditional subroutine call detected");
                 }
-                
+
                 vm.CallStack.Push(vm.IP);
                 Log.PrintMessage($"Return address {vm.IP} pushed to stack");
             }
@@ -210,5 +224,16 @@ class Interpreter
         Log.PrintMessage("Instruction executed");
 
         return false;
+    }
+    
+    private bool ExecuteSystemInstruction(Instruction instr)
+    {
+        switch (instr.Opcode)
+        {
+            case Opcodes.HALT:
+                throw new ProgramHaltException();
+            default:
+                throw new NotImplementedException($"System instruction {instr.Opcode} not implemented");
+        }
     }
 }

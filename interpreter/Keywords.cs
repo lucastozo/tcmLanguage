@@ -12,6 +12,7 @@ class Keywords
         ["COPY_CONST"] = 192,
         ["COUNTER"] = 6,
         ["DIV"] = Opcodes.DIV,
+        ["HALT"] = Opcodes.HALT,
         ["IF_EQL"] = Opcodes.IF_EQL,
         ["IF_GOE"] = Opcodes.IF_GOE,
         ["IF_GRT"] = Opcodes.IF_GRT,
