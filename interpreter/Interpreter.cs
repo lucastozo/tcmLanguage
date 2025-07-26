@@ -84,6 +84,11 @@ class Interpreter
         return opcode == Opcodes.IF_EQL || opcode == Opcodes.IF_GOE || opcode == Opcodes.IF_GRT || opcode == Opcodes.IF_LES || opcode == Opcodes.IF_LOE || opcode == Opcodes.IF_NEQ;
     }
 
+    private bool IsSubroutineAddress(byte address)
+    {
+        return Parser.SubroutineAddresses.Contains(address);
+    }
+
     private void ResolveArguments(Instruction instr)
     {
         ArgumentMode mode = GetArgumentMode(instr.Opcode);
@@ -167,15 +172,27 @@ class Interpreter
             Log.PrintMessage("Conditional detected");
             if (result == 0) return false; // Conditional was not met
 
-            // CALL NOW SUBROUTINE label?
-            bool isSubroutineCall = workingInstr.Opcode == Keywords.list["CALL"] &&
-                                workingInstr.Arg1 == Keywords.list["NOW"] &&
-                                workingInstr.Arg2 == Keywords.list["SUBROUTINE"];
-            if (isSubroutineCall)
+            // Check if explicit "CALL NOW SUBROUTINE" instruction
+            bool isExplicitSubroutineCall = workingInstr.Opcode == Keywords.list["CALL"] &&
+                                            workingInstr.Arg1 == Keywords.list["NOW"] &&
+                                            workingInstr.Arg2 == Keywords.list["SUBROUTINE"];
+
+            // Check if destination is a subroutine address (for conditional calls)
+            bool isConditionalSubroutineCall = IsSubroutineAddress(workingInstr.Destination);
+
+            if (isExplicitSubroutineCall || isConditionalSubroutineCall)
             {
-                Log.PrintMessage("Subroutine call detected");
+                if (isExplicitSubroutineCall)
+                {
+                    Log.PrintMessage("Explicit subroutine call detected");
+                }
+                else
+                {
+                    Log.PrintMessage("Conditional subroutine call detected");
+                }
+                
                 vm.CallStack.Push(vm.IP);
-                Log.PrintMessage($"Value {vm.IP} pushed to stack");
+                Log.PrintMessage($"Return address {vm.IP} pushed to stack");
             }
 
             vm.IP = (byte)(workingInstr.Destination / 4);

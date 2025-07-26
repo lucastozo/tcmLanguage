@@ -1,15 +1,21 @@
 class Parser
 {
+    // Internal storage for subroutines - no external access needed
+    internal static HashSet<int> SubroutineAddresses { get; private set; } = new HashSet<int>();
+
     public static List<Instruction> GetInstructions(string pathToFile)
     {
         Log.PrintMessage("[PARSER] initiating");
 
         Dictionary<string, byte> constants = new Dictionary<string, byte>();
         Dictionary<string, int> labels = new Dictionary<string, int>();
+        Dictionary<string, int> subroutines = new Dictionary<string, int>(); // New: subroutine addresses
         List<string> rawInstructionLines = new List<string>();
 
         string[] lines = File.ReadAllLines(pathToFile);
         int instructionIndex = 0;
+
+        SubroutineAddresses.Clear(); // Because its static, could cause a bug if run multiple programs
 
         // Preprocess
         for (int i = 0; i < lines.Length; i++)
@@ -55,6 +61,23 @@ class Parser
                 
                 continue;
             }
+            
+            if (parts[0].Equals("subroutine", StringComparison.OrdinalIgnoreCase))
+            {
+                if (parts.Length != 2) throw new Exception($"Invalid subroutine declaration at line {i + 1}");
+
+                if (instructionIndex * 4 > byte.MaxValue)
+                {
+                    throw new Exception("Program exceeds maximum addressable memory of 256 bytes.");
+                }
+
+                int address = instructionIndex * 4;
+                subroutines.Add(parts[1], address);
+                SubroutineAddresses.Add(address); // Store for interpreter access
+                Log.PrintMessage($"[PARSER] Subroutine '{parts[1]}' registered at address {address}");
+
+                continue;
+            }
 
             rawInstructionLines.Add(line);
             Log.PrintMessage($"Line {line} preprocessed sucessfully");
@@ -71,7 +94,7 @@ class Parser
 
             foreach (var part in parts)
             {
-                byte value = EvaluateExpression(part, constants, labels, i + 1);
+                byte value = EvaluateExpression(part, constants, labels, subroutines, i + 1);
                 bParts.Add(value);
             }
 
@@ -97,14 +120,15 @@ class Parser
     }
 
     private static byte EvaluateExpression(string expression, Dictionary<string, byte> constants, 
-                                         Dictionary<string, int> labels, int lineNumber)
+                                         Dictionary<string, int> labels, Dictionary<string, int> subroutines, 
+                                         int lineNumber)
     {
         try
         {
             // Check if binary value
             if (ContainsOperators(expression))
             {
-                return (byte)ParseExpression(expression, constants, labels);
+                return (byte)ParseExpression(expression, constants, labels, subroutines);
             }
             
             if (expression.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
@@ -138,6 +162,11 @@ class Parser
                 return (byte)labelAddr;
             }
 
+            if (subroutines.TryGetValue(expression, out int subroutineAddr))
+            {
+                return (byte)subroutineAddr;
+            }
+
             if (Keywords.list.TryGetValue(expression, out byte kwVal))
             {
                 return kwVal;
@@ -159,7 +188,7 @@ class Parser
     }
 
     private static int ParseExpression(string expression, Dictionary<string, byte> constants, 
-                                     Dictionary<string, int> labels)
+                                     Dictionary<string, int> labels, Dictionary<string, int> subroutines)
     {
         // Handle operators
         // 1. Multiplication (*), Division (/), Modulo (%)
@@ -168,40 +197,40 @@ class Parser
 
         if (expression.Contains('|'))
         {
-            return ParseBinaryOperation(expression, '|', constants, labels, (a, b) => a | b);
+            return ParseBinaryOperation(expression, '|', constants, labels, subroutines, (a, b) => a | b);
         }
         if (expression.Contains('^'))
         {
-            return ParseBinaryOperation(expression, '^', constants, labels, (a, b) => a ^ b);
+            return ParseBinaryOperation(expression, '^', constants, labels, subroutines, (a, b) => a ^ b);
         }
         if (expression.Contains('&'))
         {
-            return ParseBinaryOperation(expression, '&', constants, labels, (a, b) => a & b);
+            return ParseBinaryOperation(expression, '&', constants, labels, subroutines, (a, b) => a & b);
         }
 
         if (expression.Contains('+'))
         {
-            return ParseBinaryOperation(expression, '+', constants, labels, (a, b) => a + b);
+            return ParseBinaryOperation(expression, '+', constants, labels, subroutines, (a, b) => a + b);
         }
         if (expression.Contains('-'))
         {
-            return ParseBinaryOperation(expression, '-', constants, labels, (a, b) => a - b);
+            return ParseBinaryOperation(expression, '-', constants, labels, subroutines, (a, b) => a - b);
         }
 
         if (expression.Contains('*'))
         {
-            return ParseBinaryOperation(expression, '*', constants, labels, (a, b) => a * b);
+            return ParseBinaryOperation(expression, '*', constants, labels, subroutines, (a, b) => a * b);
         }
         if (expression.Contains('/'))
         {
-            return ParseBinaryOperation(expression, '/', constants, labels, (a, b) => {
+            return ParseBinaryOperation(expression, '/', constants, labels, subroutines, (a, b) => {
                 if (b == 0) throw new Exception("Division by zero");
                 return a / b;
             });
         }
         if (expression.Contains('%'))
         {
-            return ParseBinaryOperation(expression, '%', constants, labels, (a, b) => {
+            return ParseBinaryOperation(expression, '%', constants, labels, subroutines, (a, b) => {
                 if (b == 0) throw new Exception("Modulo by zero");
                 return a % b;
             });
@@ -211,17 +240,18 @@ class Parser
     }
 
     private static int ParseBinaryOperation(string expression, char op, Dictionary<string, byte> constants, 
-                                          Dictionary<string, int> labels, Func<int, int, int> operation)
+                                          Dictionary<string, int> labels, Dictionary<string, int> subroutines, 
+                                          Func<int, int, int> operation)
     {
         // Find the rightmost occurrence of the operator to handle left-to-right evaluation
         int opIndex = expression.LastIndexOf(op);
-        if (opIndex == -1) return ParseExpression(expression, constants, labels);
+        if (opIndex == -1) return ParseExpression(expression, constants, labels, subroutines);
 
         string left = expression.Substring(0, opIndex).Trim();
         string right = expression.Substring(opIndex + 1).Trim();
 
-        int leftVal = EvaluateExpression(left, constants, labels, 0);
-        int rightVal = EvaluateExpression(right, constants, labels, 0);
+        int leftVal = EvaluateExpression(left, constants, labels, subroutines, 0);
+        int rightVal = EvaluateExpression(right, constants, labels, subroutines, 0);
 
         int result = operation(leftVal, rightVal);
         
