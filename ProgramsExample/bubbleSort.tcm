@@ -1,0 +1,45 @@
+# Fill ram with some numbers, this will be our "array" to sort
+COPY_CONST 5 TO RAM
+NEXT ADDRESS IN MEMORY
+COPY_CONST 3 TO RAM
+NEXT ADDRESS IN MEMORY
+COPY_CONST 1 TO RAM
+NEXT ADDRESS IN MEMORY
+COPY_CONST 10 TO RAM
+NEXT ADDRESS IN MEMORY
+COPY_CONST 7 TO RAM
+
+MOV ADDRESS TO REG3                         # REG3 used to store length of array
+
+label lab_loop1
+COPY_CONST 0 TO ADDRESS                     # Reset RAM address to 0
+COPY_CONST 0 TO REG4                        # REG4 used to track if swap occurred
+
+    label lab_loop2
+    MOV RAM TO REG0                         # Save element A
+    NEXT ADDRESS IN MEMORY
+    MOV RAM TO REG1                         # Save element B
+
+    IF_LOE REG0 REG1 lab_skipSwap           # If A<B no swap needed
+    CALL NOW SUBROUTINE sub_swap
+
+    label lab_skipSwap
+    IF_LES ADDRESS REG3 lab_loop2           # If we are NOT in the end of the array, go verify next two elements
+
+    IF_EQL|IMD_ARG2 REG4 1 lab_loop1        # If swap occurred, repeat everything
+
+    COPY_CONST 0 TO ADDRESS
+    JMP NOW TO lab_outputSorted
+
+label sub_swap
+PREVIOUS ADDRESS IN MEMORY
+MOV REG1 TO RAM
+NEXT ADDRESS IN MEMORY
+MOV REG0 TO RAM
+COPY_CONST 1 TO REG4
+RETURN BACK TO CALLER
+
+label lab_outputSorted
+MOV RAM TO OUTPUT
+NEXT ADDRESS IN MEMORY
+IF_LOE ADDRESS REG3 lab_outputSorted

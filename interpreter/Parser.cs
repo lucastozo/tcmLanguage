@@ -165,7 +165,6 @@ class Parser
         // 1. Multiplication (*), Division (/), Modulo (%)
         // 2. Addition (+), Subtraction (-)
         // 3. Bitwise operations (|, ^, &)
-        System.Console.WriteLine(expression);
 
         if (expression.Contains('|'))
         {

@@ -1,0 +1,13 @@
+# Program to calculate nth fibonacci number
+
+const N 10 					# Define limit
+COPY_CONST 1 TO REG1 		# REG1 = 1
+COPY_CONST N TO REG4 		# REG4 = N
+
+label lab_loop
+NEXT REG3 IN REG3 			# REG3++
+ADD REG0 REG1 REG2 			# REG2 = REG0+REG1
+MOV REG1 TO REG0 			# REG0 = REG1
+MOV REG2 TO REG1 			# REG1 = REG2
+MOV REG2 TO OUTPUT 			# print(REG2)
+IF_LES REG3 REG4 lab_loop 	# if REG3 < REG4 then goto lab_loop
