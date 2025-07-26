@@ -119,7 +119,7 @@ class Interpreter
             vm.PrintState();
             bool ipWasChanged = Execute(program[vm.IP]);
             Log.PrintMessage("-------------------------------");
-            if (!ipWasChanged) vm.IP++; // If Instruction Pointer was changed because of a goto
+            if (!ipWasChanged) vm.IP++; // If Instruction Pointer was changed because of a goto, dont tamper it
         }
         vm.PrintState();
         Log.PrintMessage("-- END OF SIMULATED PROGRAM --");
@@ -135,11 +135,10 @@ class Interpreter
         ResolveArguments(workingInstr);
         Log.PrintMessage($"Arguments of instruction changed to: {workingInstr.Arg1} {workingInstr.Arg2}");
 
-        // Extract the operation code without modifying the original instruction
         byte baseOpcode = (byte)(workingInstr.Opcode & 0b00111111); // removes the 2 most significant bits
         Log.PrintMessage($"Opcode decoded to: {baseOpcode}");
-        
-        // Get result from OPCODE
+
+        // Execute OPCODE
         byte result = baseOpcode switch
         {
             Opcodes.ADD => (byte)(workingInstr.Arg1 + workingInstr.Arg2),

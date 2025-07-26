@@ -1,6 +1,5 @@
 class Parser
 {
-    // Internal storage for subroutines - no external access needed
     internal static HashSet<int> SubroutineAddresses { get; private set; } = new HashSet<int>();
 
     public static List<Instruction> GetInstructions(string pathToFile)
@@ -9,7 +8,7 @@ class Parser
 
         Dictionary<string, byte> constants = new Dictionary<string, byte>();
         Dictionary<string, int> labels = new Dictionary<string, int>();
-        Dictionary<string, int> subroutines = new Dictionary<string, int>(); // New: subroutine addresses
+        Dictionary<string, int> subroutines = new Dictionary<string, int>();
         List<string> rawInstructionLines = new List<string>();
 
         string[] lines = File.ReadAllLines(pathToFile);
@@ -125,7 +124,6 @@ class Parser
     {
         try
         {
-            // Check if binary value
             if (ContainsOperators(expression))
             {
                 return (byte)ParseExpression(expression, constants, labels, subroutines);
@@ -254,8 +252,7 @@ class Parser
         int rightVal = EvaluateExpression(right, constants, labels, subroutines, 0);
 
         int result = operation(leftVal, rightVal);
-        
-        // Ensure result fits in byte range
+
         if (result < 0 || result > 255)
         {
             throw new Exception($"Expression result {result} out of byte range (0-255)");
