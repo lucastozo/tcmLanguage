@@ -13,6 +13,7 @@
 *.sln.docstates
 
 # Build results
+dist/
 [Dd]ebug/
 [Rr]elease/
 x64/
