@@ -111,7 +111,7 @@ subroutine multiply_by_two
     RETURN BACK TO CALLER
 
 # Calling the subroutine
-IF_EQL|IMD_ARG3 1 1 multiply_by_two  # Always true condition
+CALL NOW SUBROUTINE multiply_by_two    # Alternatively: JMP NOW TO multiply_by_two
 ```
 
 When you call a subroutine, the return address gets pushed onto the stack automatically. The `RETURN BACK TO CALLER` instruction pops that address and jumps back to where the subroutine was called.
