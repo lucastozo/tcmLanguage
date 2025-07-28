@@ -10,6 +10,7 @@ class Parser
         Dictionary<string, int> labels = new Dictionary<string, int>();
         Dictionary<string, int> subroutines = new Dictionary<string, int>();
         List<string> rawInstructionLines = new List<string>();
+        List<int> originalLineNumbers = new List<int>(); // Original line numbers (og file used as reference)
 
         string[] lines = File.ReadAllLines(pathToFile);
         int instructionIndex = 0;
@@ -79,6 +80,7 @@ class Parser
             }
 
             rawInstructionLines.Add(line);
+            originalLineNumbers.Add(i + 1);
             Log.PrintMessage($"Line {line} preprocessed sucessfully");
             instructionIndex++;
         }
@@ -88,12 +90,13 @@ class Parser
 
         for (int i = 0; i < rawInstructionLines.Count; i++)
         {
+            int originalLineNum = originalLineNumbers[i];
             string[] parts = rawInstructionLines[i].Split(' ');
             List<byte> bParts = new();
 
             foreach (var part in parts)
             {
-                byte value = EvaluateExpression(part, constants, labels, subroutines, i + 1);
+                byte value = EvaluateExpression(part, constants, labels, subroutines, originalLineNum);
                 bParts.Add(value);
             }
 
@@ -107,12 +110,12 @@ class Parser
                 }
                 else
                 {
-                    throw new Exception($"Invalid instruction at line {i + 1}: not a valid zero-operand instruction");
+                    throw new Exception($"Invalid instruction at line {originalLineNum}: not a valid zero-operand instruction");
                 }
             }
             else if (bParts.Count != 4)
             {
-                throw new Exception($"Invalid instruction at line {i + 1}: must have exactly 4 operands or be a valid zero-operand instruction");
+                throw new Exception($"Invalid instruction at line {originalLineNum}: must have exactly 4 operands or be a valid zero-operand instruction");
             }
 
             instructions.Add(new Instruction(bParts[0], bParts[1], bParts[2], bParts[3]));
