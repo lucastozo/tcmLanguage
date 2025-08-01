@@ -3,7 +3,7 @@
 label lab_loop
 COPY_CONST 255 TO RAM
 NEXT ADDRESS IN MEMORY
-IF_LES|IMD_ARG2 ADDRESS 255 lab_loop	# If ram address < 255 repeat
+IF_LES|IMD_ARG2 ADDRESS 255 lab_loop    # If ram address < 255 repeat
 
 # Address 255 of RAM will still be 0 because the loop will exit at running 254th iteration. Cant use IF_LOE because that cause an infinite loop
 COPY_CONST 255 TO RAM
