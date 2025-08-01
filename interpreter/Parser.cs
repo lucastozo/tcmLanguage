@@ -11,6 +11,9 @@ class Parser
         Dictionary<string, int> subroutines = new Dictionary<string, int>();
         List<string> rawInstructionLines = new List<string>();
         List<int> originalLineNumbers = new List<int>(); // Original line numbers (og file used as reference)
+        
+        // Pragma settings
+        bool allowOverflow = false;
 
         string[] lines = File.ReadAllLines(pathToFile);
         int instructionIndex = 0;
@@ -27,6 +30,28 @@ class Parser
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             string[] parts = line.Split(' ');
+
+            // Pragma directives
+            if (parts[0].Equals("@pragma", StringComparison.OrdinalIgnoreCase))
+            {
+                if (parts.Length != 2) throw new Exception($"Invalid pragma directive at line {i + 1}. Expected: @pragma <option>");
+                
+                string pragmaOption = parts[1].ToLowerInvariant();
+                switch (pragmaOption)
+                {
+                    case "allow_overflow":
+                        allowOverflow = true;
+                        Log.PrintMessage($"[PARSER] Pragma: overflow behavior enabled");
+                        break;
+                    case "disallow_overflow":
+                        allowOverflow = false;
+                        Log.PrintMessage($"[PARSER] Pragma: overflow behavior disabled");
+                        break;
+                    default:
+                        throw new Exception($"Unknown pragma option '{parts[1]}' at line {i + 1}.");
+                }
+                continue;
+            }
 
             if (parts[0].Equals("const", StringComparison.OrdinalIgnoreCase))
             {
@@ -96,7 +121,7 @@ class Parser
 
             foreach (var part in parts)
             {
-                byte value = EvaluateExpression(part, constants, labels, subroutines, originalLineNum);
+                byte value = EvaluateExpression(part, constants, labels, subroutines, originalLineNum, allowOverflow);
                 bParts.Add(value);
             }
 
@@ -136,13 +161,13 @@ class Parser
 
     private static byte EvaluateExpression(string expression, Dictionary<string, byte> constants,
                                          Dictionary<string, int> labels, Dictionary<string, int> subroutines,
-                                         int lineNumber)
+                                         int lineNumber, bool allowOverflow = false)
     {
         try
         {
             if (ContainsOperators(expression))
             {
-                return (byte)ParseExpression(expression, constants, labels, subroutines);
+                return (byte)ParseExpression(expression, constants, labels, subroutines, allowOverflow);
             }
 
             if (expression.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
@@ -162,8 +187,20 @@ class Parser
             if (expression.All(char.IsDigit))
             {
                 int v = int.Parse(expression);
-                if (v < 0 || v > 255) throw new Exception($"Value {v} out of byte range at line {lineNumber}");
-                return (byte)v;
+                
+                if (allowOverflow)
+                {
+                    if (v < 0)
+                    {
+                        while (v < 0) v += 256;
+                    }
+                    return (byte)(v % 256);
+                }
+                else
+                {
+                    if (v < 0 || v > 255) throw new Exception($"Value {v} out of byte range at line {lineNumber}");
+                    return (byte)v;
+                }
             }
 
             if (constants.TryGetValue(expression, out byte constVal))
@@ -202,7 +239,8 @@ class Parser
     }
 
     private static int ParseExpression(string expression, Dictionary<string, byte> constants,
-                                     Dictionary<string, int> labels, Dictionary<string, int> subroutines)
+                                     Dictionary<string, int> labels, Dictionary<string, int> subroutines,
+                                     bool allowOverflow = false)
     {
         // Handle operators
         // 1. Multiplication (*), Division (/), Modulo (%)
@@ -211,29 +249,29 @@ class Parser
 
         if (expression.Contains('|'))
         {
-            return ParseBinaryOperation(expression, '|', constants, labels, subroutines, (a, b) => a | b);
+            return ParseBinaryOperation(expression, '|', constants, labels, subroutines, (a, b) => a | b, allowOverflow);
         }
         if (expression.Contains('^'))
         {
-            return ParseBinaryOperation(expression, '^', constants, labels, subroutines, (a, b) => a ^ b);
+            return ParseBinaryOperation(expression, '^', constants, labels, subroutines, (a, b) => a ^ b, allowOverflow);
         }
         if (expression.Contains('&'))
         {
-            return ParseBinaryOperation(expression, '&', constants, labels, subroutines, (a, b) => a & b);
+            return ParseBinaryOperation(expression, '&', constants, labels, subroutines, (a, b) => a & b, allowOverflow);
         }
 
         if (expression.Contains('+'))
         {
-            return ParseBinaryOperation(expression, '+', constants, labels, subroutines, (a, b) => a + b);
+            return ParseBinaryOperation(expression, '+', constants, labels, subroutines, (a, b) => a + b, allowOverflow);
         }
         if (expression.Contains('-'))
         {
-            return ParseBinaryOperation(expression, '-', constants, labels, subroutines, (a, b) => a - b);
+            return ParseBinaryOperation(expression, '-', constants, labels, subroutines, (a, b) => a - b, allowOverflow);
         }
 
         if (expression.Contains('*'))
         {
-            return ParseBinaryOperation(expression, '*', constants, labels, subroutines, (a, b) => a * b);
+            return ParseBinaryOperation(expression, '*', constants, labels, subroutines, (a, b) => a * b, allowOverflow);
         }
         if (expression.Contains('/'))
         {
@@ -241,7 +279,7 @@ class Parser
             {
                 if (b == 0) throw new Exception("Division by zero");
                 return a / b;
-            });
+            }, allowOverflow);
         }
         if (expression.Contains('%'))
         {
@@ -249,7 +287,7 @@ class Parser
             {
                 if (b == 0) throw new Exception("Modulo by zero");
                 return a % b;
-            });
+            }, allowOverflow);
         }
 
         throw new Exception($"Invalid expression '{expression}'");
@@ -257,25 +295,35 @@ class Parser
 
     private static int ParseBinaryOperation(string expression, char op, Dictionary<string, byte> constants,
                                           Dictionary<string, int> labels, Dictionary<string, int> subroutines,
-                                          Func<int, int, int> operation)
+                                          Func<int, int, int> operation, bool allowOverflow = false)
     {
         // Find the rightmost occurrence of the operator to handle left-to-right evaluation
         int opIndex = expression.LastIndexOf(op);
-        if (opIndex == -1) return ParseExpression(expression, constants, labels, subroutines);
+        if (opIndex == -1) return ParseExpression(expression, constants, labels, subroutines, allowOverflow);
 
         string left = expression.Substring(0, opIndex).Trim();
         string right = expression.Substring(opIndex + 1).Trim();
 
-        int leftVal = EvaluateExpression(left, constants, labels, subroutines, 0);
-        int rightVal = EvaluateExpression(right, constants, labels, subroutines, 0);
+        int leftVal = EvaluateExpression(left, constants, labels, subroutines, 0, allowOverflow);
+        int rightVal = EvaluateExpression(right, constants, labels, subroutines, 0, allowOverflow);
 
         int result = operation(leftVal, rightVal);
 
-        if (result < 0 || result > 255)
+        if (allowOverflow)
         {
-            throw new Exception($"Expression result {result} out of byte range (0-255)");
+            if (result < 0)
+            {
+                while (result < 0) result += 256;
+            }
+            return result % 256;
         }
-
-        return result;
+        else
+        {
+            if (result < 0 || result > 255)
+            {
+                throw new Exception($"Expression result {result} out of byte range (0-255)");
+            }
+            return result;
+        }
     }
 }
