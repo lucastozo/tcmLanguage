@@ -1,64 +1,77 @@
-﻿if (args.Length == 0) Log.PrintError("You must type the path to your code file as a argument.");
+﻿using interpreter.Core;
+using interpreter.Parsing;
+using interpreter.Utils;
 
-string filePath = args[0];
-
-for (int i = 1; i < args.Length; i++)
+namespace interpreter
 {
-    string arg = args[i].ToLower();
-    switch (arg)
+    class Program
     {
-        case "--log":
-        case "-l":
-            Log.ShowLogs = true;
-            break;
-        case "--write":
-        case "-w":
-            Log.WriteToFile = true;
-            break;
-        case "--size":
-        case "-s":
-            if (i + 1 < args.Length && int.TryParse(args[i + 1], out int sizeMB))
+        static void Main(string[] args)
+        {
+            if (args.Length == 0) Log.PrintError("You must type the path to your code file as a argument.");
+            
+            string filePath = args[0];
+            
+            for (int i = 1; i < args.Length; i++)
             {
-                Log.MaxFileSizeBytes = sizeMB * 1024 * 1024;
-                Log.PrintMessage($"Log file size limit set to {sizeMB}MB");
-                i++;
+                string arg = args[i].ToLower();
+                switch (arg)
+                {
+                    case "--log":
+                    case "-l":
+                        Log.ShowLogs = true;
+                        break;
+                    case "--write":
+                    case "-w":
+                        Log.WriteToFile = true;
+                        break;
+                    case "--size":
+                    case "-s":
+                        if (i + 1 < args.Length && int.TryParse(args[i + 1], out int sizeMB))
+                        {
+                            Log.MaxFileSizeBytes = sizeMB * 1024 * 1024;
+                            Log.PrintMessage($"Log file size limit set to {sizeMB}MB");
+                            i++;
+                        }
+                        else
+                        {
+                            Log.PrintError("Invalid or missing size value after --size");
+                        }
+                        break;
+                    case "--no-limit":
+                        Log.EnableSizeLimit = false;
+                        Log.PrintMessage("Log file size limit disabled");
+                        break;
+                }
             }
-            else
+            
+            if (Log.ShowLogs) Log.PrintMessage("Executing program with logs enabled");
+            if (Log.WriteToFile) Log.PrintMessage("Logs will be written to a file");
+            
+            Log.PrintMessage($"Trying to load file {filePath}...");
+            try
             {
-                Log.PrintError("Invalid or missing size value after --size");
+                if (!File.Exists(filePath)) throw new FileLoadException();
             }
-            break;
-        case "--no-limit":
-            Log.EnableSizeLimit = false;
-            Log.PrintMessage("Log file size limit disabled");
-            break;
+            catch (Exception e)
+            {
+                Log.PrintError(e.Message);
+            }
+            
+            Log.PrintMessage("File loaded sucessfully");
+            
+            VirtualMachine vm = new VirtualMachine();
+            Interpreter interpreter = new Interpreter(vm);
+            try
+            {
+                List<Instruction> instructions = Parser.GetInstructions(filePath);
+                interpreter.Run(instructions);
+                Log.PrintMessage("-- END OF PROGRAM --");
+            }
+            catch (Exception e)
+            {
+                Log.PrintError(e.Message);
+            }
+        }
     }
-}
-
-if (Log.ShowLogs) Log.PrintMessage("Executing program with logs enabled");
-if (Log.WriteToFile) Log.PrintMessage("Logs will be written to a file");
-
-Log.PrintMessage($"Trying to load file {filePath}...");
-try
-{
-    if (!File.Exists(filePath)) throw new FileLoadException();
-}
-catch (Exception e)
-{
-    Log.PrintError(e.Message);
-}
-
-Log.PrintMessage("File loaded sucessfully");
-
-VirtualMachine vm = new VirtualMachine();
-Interpreter interpreter = new Interpreter(vm);
-try
-{
-    List<Instruction> instructions = Parser.GetInstructions(filePath);
-    interpreter.Run(instructions);
-    Log.PrintMessage("-- END OF PROGRAM --");
-}
-catch (Exception e)
-{
-    Log.PrintError(e.Message);
 }
