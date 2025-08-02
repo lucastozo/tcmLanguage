@@ -124,9 +124,12 @@ namespace interpreter.Core
                 while (vm.IP < program.Count)
                 {
                     vm.PrintState();
-                    bool ipWasChanged = Execute(program[vm.IP]);
+                    int oldIP = vm.IP;
+                    Execute(program[vm.IP]);
+                    
+                    if (vm.IP == oldIP) vm.IP++;
+                    
                     Log.PrintMessage("-------------------------------");
-                    if (!ipWasChanged) vm.IP++;
                 }
             }
             catch (ProgramHaltException)
@@ -137,14 +140,14 @@ namespace interpreter.Core
             Log.PrintMessage("-- END OF SIMULATED PROGRAM --");
         }
     
-        private bool Execute(Instruction instr)
+        private void Execute(Instruction instr)
         {
             Log.PrintMessage($"Executing instruction: {instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}");
     
             // Handle system instructions before masking
             if (instr.Opcode >= Opcodes.SYSTEM_INSTRUCTION_START) // System instruction range
             {
-                return ExecuteSystemInstruction(instr);
+                ExecuteSystemInstruction(instr);
             }
     
             Instruction workingInstr = new Instruction(instr.Opcode, instr.Arg1, instr.Arg2, instr.Destination);
@@ -188,7 +191,7 @@ namespace interpreter.Core
             if (OpcodeIsConditional(baseOpcode))
             {
                 Log.PrintMessage("Conditional detected");
-                if (result == 0) return false; // Conditional was not met
+                if (result == 0) return; // Conditional was not met
     
                 // Check if explicit "CALL NOW SUBROUTINE" instruction
                 bool isExplicitSubroutineCall = workingInstr.Opcode == Keywords.list["CALL"] &&
@@ -209,13 +212,13 @@ namespace interpreter.Core
                         Log.PrintMessage("Conditional subroutine call detected");
                     }
     
-                    vm.CallStack.Push(vm.IP);
+                    vm.CallStack.Push((byte)(vm.IP + 1));
                     Log.PrintMessage($"Return address {vm.IP} pushed to stack");
                 }
     
                 vm.IP = (byte)(workingInstr.Destination / 4);
                 Log.PrintMessage($"Value {vm.IP} moved to Instruction Pointer");
-                return true;
+                return;
             }
     
             string? variableChanged = SetVariable(workingInstr.Destination, result);
@@ -227,8 +230,6 @@ namespace interpreter.Core
             }
     
             Log.PrintMessage("Instruction executed");
-    
-            return false;
         }
     
         private bool ExecuteSystemInstruction(Instruction instr)

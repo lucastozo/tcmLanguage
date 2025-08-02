@@ -8,9 +8,9 @@ namespace interpreter.Parsing
         {
             var context = new ParserContext();
             int instructionIndex = 0;
-    
+
             context.SubroutineAddresses.Clear(); // Clear previous subroutine addresses
-    
+
             // Preprocess
             for (int i = 0; i < lines.Length; i++)
             {
@@ -19,39 +19,44 @@ namespace interpreter.Parsing
                 if (commentIdx >= 0) line = line[..commentIdx];
                 line = string.Join(" ", line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
                 if (string.IsNullOrWhiteSpace(line)) continue;
-    
+
                 string[] parts = line.Split(' ');
-    
-                // Handle pragma directives
+
+                 // Handle pragma directives
                 if (PragmaProcessor.ProcessPragma(parts, i + 1, settings))
                 {
                     continue;
                 }
-    
+
                 if (parts[0].Equals("const", StringComparison.OrdinalIgnoreCase))
                 {
                     ProcessConstant(parts, i + 1, context);
                     continue;
                 }
-    
+
                 if (parts[0].Equals("label", StringComparison.OrdinalIgnoreCase))
                 {
                     ProcessLabel(parts, i + 1, context, instructionIndex);
                     continue;
                 }
-    
+
                 if (parts[0].Equals("subroutine", StringComparison.OrdinalIgnoreCase))
                 {
                     ProcessSubroutine(parts, i + 1, context, instructionIndex);
                     continue;
                 }
-    
+
+                if (instructionIndex >= 64)
+                {
+                    throw new Exception($"Program exceeds maximum of 64 instructions at line {i + 1}");
+                }
+
                 context.RawInstructionLines.Add(line);
                 context.OriginalLineNumbers.Add(i + 1);
                 Log.PrintMessage($"Line {line} preprocessed sucessfully");
                 instructionIndex++;
             }
-    
+
             return context;
         }
     
