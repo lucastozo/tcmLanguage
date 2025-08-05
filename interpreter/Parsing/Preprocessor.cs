@@ -10,6 +10,8 @@ namespace interpreter.Parsing
             int instructionIndex = 0;
 
             context.SubroutineAddresses.Clear(); // Clear previous subroutine addresses
+            
+            var currentSettings = new ParserSettings { Overflow = settings.Overflow };
 
             // Preprocess
             for (int i = 0; i < lines.Length; i++)
@@ -23,7 +25,7 @@ namespace interpreter.Parsing
                 string[] parts = line.Split(' ');
 
                  // Handle pragma directives
-                if (PragmaProcessor.ProcessPragma(parts, i + 1, settings))
+                if (PragmaProcessor.ProcessPragma(parts, i + 1, currentSettings))
                 {
                     continue;
                 }
@@ -50,6 +52,9 @@ namespace interpreter.Parsing
                 {
                     throw new Exception($"Program exceeds maximum of 64 instructions at line {i + 1}");
                 }
+                
+                var settingsSnapshot = new ParserSettings { Overflow = currentSettings.Overflow };
+                context.InstructionSettings.Add(settingsSnapshot);
 
                 context.RawInstructionLines.Add(line);
                 context.OriginalLineNumbers.Add(i + 1);

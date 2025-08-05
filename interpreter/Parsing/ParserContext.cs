@@ -8,5 +8,6 @@ namespace interpreter.Parsing
         public List<string> RawInstructionLines { get; set; } = new List<string>();
         public List<int> OriginalLineNumbers { get; set; } = new List<int>();
         public HashSet<int> SubroutineAddresses { get; set; } = new HashSet<int>();
+        public List<ParserSettings> InstructionSettings { get; set; } = new List<ParserSettings>();
     }
 }

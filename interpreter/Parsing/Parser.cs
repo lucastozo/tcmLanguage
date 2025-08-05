@@ -46,10 +46,12 @@ namespace interpreter.Parsing
                 int originalLineNum = context.OriginalLineNumbers[i];
                 string[] parts = context.RawInstructionLines[i].Split(' ');
                 List<byte> bParts = new();
+                
+                var instructionSettings = context.InstructionSettings[i];
     
                 foreach (var part in parts)
                 {
-                    byte value = ExpressionEvaluator.EvaluateExpression(part, context, originalLineNum, settings.AllowOverflow);
+                    byte value = ExpressionEvaluator.EvaluateExpression(part, context, originalLineNum, instructionSettings.Overflow);
                     bParts.Add(value);
                 }
     
