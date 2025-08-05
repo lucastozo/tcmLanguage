@@ -36,13 +36,13 @@ namespace interpreter.Parsing
                     {
                         if (v < 0)
                         {
-                            while (v < 0) v += 256;
+                            while (v < 0) v += byte.MaxValue+1;
                         }
-                        return (byte)(v % 256);
+                        return (byte)(v % (byte.MaxValue+1));
                     }
                     else
                     {
-                        if (v < 0 || v > 255) throw new Exception($"Value {v} out of byte range at line {lineNumber}");
+                        if (v < byte.MinValue || v > byte.MaxValue) throw new Exception($"Value {v} out of range ({byte.MinValue}-{byte.MaxValue}) at line {lineNumber}");
                         return (byte)v;
                     }
                 }
@@ -160,9 +160,9 @@ namespace interpreter.Parsing
             }
             else
             {
-                if (result < 0 || result > 255)
+                if (result < byte.MinValue || result > byte.MaxValue)
                 {
-                    throw new Exception($"Expression result {result} out of byte range (0-255)");
+                    throw new Exception($"Expression result {result} out of range ({byte.MinValue}-{byte.MaxValue})");
                 }
                 return result;
             }

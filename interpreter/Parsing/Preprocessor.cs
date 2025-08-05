@@ -48,9 +48,9 @@ namespace interpreter.Parsing
                     continue;
                 }
 
-                if (instructionIndex >= 64)
+                if (instructionIndex >= (byte.MaxValue+1)/4)
                 {
-                    throw new Exception($"Program exceeds maximum of 64 instructions at line {i + 1}");
+                    throw new Exception($"Program exceeds maximum of {(byte.MaxValue+1)/4} instructions at line {i + 1}");
                 }
                 
                 var settingsSnapshot = new ParserSettings { Overflow = currentSettings.Overflow };

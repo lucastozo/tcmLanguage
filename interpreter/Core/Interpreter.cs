@@ -23,9 +23,9 @@ namespace interpreter.Core
     
         private ArgumentMode GetArgumentMode(byte opcode)
         {
-            const byte MASK_ARG1 = 128; // 10000000
-            const byte MASK_ARG2 = 64;  // 01000000
-            const byte MASK_BOTH = 192; // 11000000
+            const byte MASK_ARG1 = 1 << 7;
+            const byte MASK_ARG2 = 1 << 6;
+            const byte MASK_BOTH = MASK_ARG1 | MASK_ARG2;
             if ((opcode & MASK_BOTH) == MASK_BOTH) return ArgumentMode.BothArgs;
             if ((opcode & MASK_ARG1) == MASK_ARG1) return ArgumentMode.Arg1Only;
             if ((opcode & MASK_ARG2) == MASK_ARG2) return ArgumentMode.Arg2Only;
