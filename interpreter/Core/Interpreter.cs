@@ -8,10 +8,11 @@ namespace interpreter.Core
         private VirtualMachine vm;
         private List<ParserSettings> instructionSettings;
         private const byte RAM_ADDRESS_CONTROLLER = 5; // REG5 controls the address of RAM
-    
+        
         public Interpreter(VirtualMachine vm)
         {
             this.vm = vm;
+            this.instructionSettings = new List<ParserSettings>();
         }
 
         public void SetInstructionSettings(List<ParserSettings> settings)
