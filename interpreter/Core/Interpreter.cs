@@ -133,9 +133,18 @@ namespace interpreter.Core
                     vm.PrintState();
                     int oldIP = vm.IP;
                     Execute(program[vm.IP]);
-                    
+
+                    if (vm.IP >= byte.MaxValue)
+                    {
+                        /*
+                         This is to prevent endless running a program with 255
+                         instructions, without it, the pointer would overflow to 0
+                         and restart endlessly
+                        */
+                        return;
+                    }
                     if (vm.IP == oldIP) vm.IP++;
-                    
+
                     Log.PrintMessage("-------------------------------");
                 }
             }
@@ -223,7 +232,7 @@ namespace interpreter.Core
                     Log.PrintMessage($"Return address {vm.IP} pushed to stack");
                 }
     
-                vm.IP = (byte)(workingInstr.Destination / 4);
+                vm.IP = (byte)(workingInstr.Destination);
                 Log.PrintMessage($"Value {vm.IP} moved to Instruction Pointer");
                 return;
             }

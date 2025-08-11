@@ -34,6 +34,11 @@ namespace interpreter.Parsing
                     continue;
                 }
 
+                if (instructionIndex > byte.MaxValue)
+                {
+                    throw new Exception($"Program exceeds maximum of {byte.MaxValue} instructions at line {i + 1}");
+                }
+
                 if (parts[0].Equals("const", StringComparison.OrdinalIgnoreCase))
                 {
                     ProcessConstant(parts, i + 1, context);
@@ -50,11 +55,6 @@ namespace interpreter.Parsing
                 {
                     ProcessSubroutine(parts, i + 1, context, instructionIndex);
                     continue;
-                }
-
-                if (instructionIndex >= (byte.MaxValue+1)/4)
-                {
-                    throw new Exception($"Program exceeds maximum of {(byte.MaxValue+1)/4} instructions at line {i + 1}");
                 }
                 
                 var settingsSnapshot = new ParserSettings
@@ -90,35 +90,16 @@ namespace interpreter.Parsing
         {
             if (parts.Length != 2) 
                 throw new Exception($"Invalid label at line {lineNumber}");
-    
-            /* 
-            -- ABOUT LABEL AND INSTRUCTION INDEX * 4 --
-                Turing Complete game treat label address as a single byte,
-                instead of a index of instruction.
-                So if subroutine is the 5th instruction, adress will be 4*4 = 16,
-                because the 16th byte is the first byte of the 5th instruction.
-                Kinda counterintuitive, but that's how the game works.
-                This is why we multiply instruction index by 4.
-            */
-            if (instructionIndex * 4 > byte.MaxValue)
-            {
-                throw new Exception("Program exceeds maximum addressable memory of 256 bytes.");
-            }
             
-            context.Labels.Add(parts[1], instructionIndex * 4);
+            context.Labels.Add(parts[1], instructionIndex);
         }
     
         private static void ProcessSubroutine(string[] parts, int lineNumber, ParserContext context, int instructionIndex)
         {
             if (parts.Length != 2) 
                 throw new Exception($"Invalid subroutine declaration at line {lineNumber}");
-    
-            if (instructionIndex * 4 > byte.MaxValue)
-            {
-                throw new Exception("Program exceeds maximum addressable memory of 256 bytes.");
-            }
-    
-            int address = instructionIndex * 4;
+
+            int address = instructionIndex;
             context.Subroutines.Add(parts[1], address);
             context.SubroutineAddresses.Add(address); // Store for interpreter access
             Log.PrintMessage($"[PARSER] Subroutine '{parts[1]}' registered at address {address}");
