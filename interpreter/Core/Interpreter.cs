@@ -6,11 +6,17 @@ namespace interpreter.Core
     class Interpreter
     {
         private VirtualMachine vm;
+        private List<ParserSettings> instructionSettings;
         private const byte RAM_ADDRESS_CONTROLLER = 5; // REG5 controls the address of RAM
     
         public Interpreter(VirtualMachine vm)
         {
             this.vm = vm;
+        }
+
+        public void SetInstructionSettings(List<ParserSettings> settings)
+        {
+            this.instructionSettings = settings;
         }
     
         private enum ArgumentMode
@@ -223,10 +229,23 @@ namespace interpreter.Core
     
             string? variableChanged = SetVariable(workingInstr.Destination, result);
             Log.PrintMessage($"Variable {variableChanged} received value {result}");
-    
+
             if (workingInstr.Destination == Keywords.list["OUTPUT"])
             {
-                Console.WriteLine(vm.Output);
+                bool charMode = false;
+                if (instructionSettings != null && vm.IP < instructionSettings.Count)
+                {
+                    charMode = instructionSettings[vm.IP].CharOutput;
+                }
+
+                if (charMode)
+                {
+                    Console.Write((char)vm.Output);
+                }
+                else
+                {
+                    Console.WriteLine(vm.Output);
+                }
             }
     
             Log.PrintMessage("Instruction executed");

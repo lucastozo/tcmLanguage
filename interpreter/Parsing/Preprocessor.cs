@@ -11,7 +11,11 @@ namespace interpreter.Parsing
 
             context.SubroutineAddresses.Clear(); // Clear previous subroutine addresses
             
-            var currentSettings = new ParserSettings { Overflow = settings.Overflow };
+            var currentSettings = new ParserSettings
+            {
+                Overflow = settings.Overflow,
+                CharOutput = settings.CharOutput
+            };
 
             // Preprocess
             for (int i = 0; i < lines.Length; i++)
@@ -53,7 +57,11 @@ namespace interpreter.Parsing
                     throw new Exception($"Program exceeds maximum of {(byte.MaxValue+1)/4} instructions at line {i + 1}");
                 }
                 
-                var settingsSnapshot = new ParserSettings { Overflow = currentSettings.Overflow };
+                var settingsSnapshot = new ParserSettings
+                {
+                    Overflow = currentSettings.Overflow,
+                    CharOutput = currentSettings.CharOutput
+                };
                 context.InstructionSettings.Add(settingsSnapshot);
 
                 context.RawInstructionLines.Add(line);

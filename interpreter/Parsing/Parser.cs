@@ -8,7 +8,7 @@ namespace interpreter.Parsing
         // Keep for backward compatibility with Interpreter
         internal static HashSet<int> SubroutineAddresses { get; private set; } = new HashSet<int>();
     
-        public static List<Instruction> GetInstructions(string pathToFile)
+        public static (List<Instruction>, List<ParserSettings>) GetInstructionsWithSettings(string pathToFile)
         {
             Log.PrintMessage("[PARSER] initiating");
     
@@ -34,31 +34,36 @@ namespace interpreter.Parsing
                 Log.PrintMessage(programMsg);
             }
     
-            return instructions;
+            return (instructions, context.InstructionSettings);
+        }
+        
+        public static List<Instruction> GetInstructions(string pathToFile)
+        {
+            return GetInstructionsWithSettings(pathToFile).Item1;
         }
     
         private static List<Instruction> BuildInstructions(ParserContext context, ParserSettings settings)
         {
             List<Instruction> instructions = new List<Instruction>();
-    
+
             for (int i = 0; i < context.RawInstructionLines.Count; i++)
             {
                 int originalLineNum = context.OriginalLineNumbers[i];
                 string[] parts = context.RawInstructionLines[i].Split(' ');
                 List<byte> bParts = new();
-                
+
                 var instructionSettings = context.InstructionSettings[i];
-    
+
                 foreach (var part in parts)
                 {
                     byte value = ExpressionEvaluator.EvaluateExpression(part, context, originalLineNum, instructionSettings.Overflow);
                     bParts.Add(value);
                 }
-    
+
                 if (bParts.Count == 1)
                 {
                     byte opcode = bParts[0];
-    
+
                     if (opcode >= Opcodes.SYSTEM_INSTRUCTION_START)
                     {
                         bParts.AddRange([0, 0, 0]); // Dummy values
@@ -72,10 +77,10 @@ namespace interpreter.Parsing
                 {
                     throw new Exception($"Invalid instruction at line {originalLineNum}: must have exactly 4 operands or be a valid zero-operand instruction");
                 }
-    
+
                 instructions.Add(new Instruction(bParts[0], bParts[1], bParts[2], bParts[3]));
             }
-    
+
             return instructions;
         }
     }

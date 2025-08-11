@@ -23,6 +23,11 @@ namespace interpreter.Parsing
                         if (enable) Log.PrintMessage($"[PARSER] Pragma: overflow behavior enabled");
                         else Log.PrintMessage($"[PARSER] Pragma: overflow behavior disabled");
                         break;
+                    case "char":
+                        settings.CharOutput = enable;
+                        if (enable) Log.PrintMessage($"[PARSER] Pragma: character output mode enabled");
+                        else Log.PrintMessage($"[PARSER] Pragma: character output mode disabled");
+                        break;
                     default:
                         throw new Exception($"Unknown pragma option '{parts[1]}' at line {lineNumber}.");
                 }

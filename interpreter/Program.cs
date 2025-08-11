@@ -64,7 +64,8 @@ namespace interpreter
             Interpreter interpreter = new Interpreter(vm);
             try
             {
-                List<Instruction> instructions = Parser.GetInstructions(filePath);
+                var (instructions, settings) = Parser.GetInstructionsWithSettings(filePath);
+                interpreter.SetInstructionSettings(settings);
                 interpreter.Run(instructions);
                 Log.PrintMessage("-- END OF PROGRAM --");
             }
