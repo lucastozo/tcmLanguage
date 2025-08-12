@@ -25,7 +25,7 @@ namespace interpreter.Utils
             ["IMD_ARG2"] = 64,
             ["IMD_ARG3"] = 192,
             ["IN"] = 1,
-            //["INPUT"] = 7, // Only makes sense in-game
+            ["INPUT"] = 9,
             ["JMP"] = 208,
             ["MEMORY"] = 5,
             ["MOD"] = Opcodes.MOD,

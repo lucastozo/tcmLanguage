@@ -45,18 +45,34 @@ namespace interpreter.Core
             /*
                 The possible "variables" are:
                 REG0, REG1, REG2, REG3, REG4, REG5
-                INPUT *wont be implemented here
+                INPUT
                 OUTPUT
                 STACK
                 RAM
             */
     
             if (variableCode <= VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
+            if (variableCode == Keywords.list["INPUT"]) return GetUserInput();
             if (variableCode == Keywords.list["OUTPUT"]) return vm.Output;
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
             if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[RAM_ADDRESS_CONTROLLER]];
     
             return 0;
+        }
+
+        private byte GetUserInput()
+        {
+            Log.PrintMessage("[INTERPRETER] INPUT requested");
+            string? input = Console.ReadLine();
+            Log.PrintMessage($"[INTERPRETER] User input received: {input}");
+
+            if (!string.IsNullOrWhiteSpace(input) && byte.TryParse(input.Trim(), out byte value))
+            {
+                Log.PrintMessage($"[INTERPRETER] User input parsed successfully: {value}");
+                return value;
+            }
+
+            throw new InvalidInputException();
         }
     
         private string? SetVariable(byte variableCode, byte value)
