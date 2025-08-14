@@ -14,20 +14,6 @@ namespace interpreter.Parsing
                     return (byte)ParseExpression(expression, context, allowOverflow);
                 }
     
-                if (expression.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
-                {
-                    string binaryPart = expression.Substring(2);
-                    if (binaryPart.Length != 8)
-                    {
-                        throw new Exception($"Binary value must have exactly 8 bits, got {binaryPart.Length} at line {lineNumber}");
-                    }
-                    if (!binaryPart.All(c => c == '0' || c == '1'))
-                    {
-                        throw new Exception($"Binary value can only contain 0 and 1 at line {lineNumber}");
-                    }
-                    return Convert.ToByte(binaryPart, 2);
-                }
-    
                 if (expression.All(char.IsDigit))
                 {
                     int v = int.Parse(expression);
