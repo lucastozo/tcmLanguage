@@ -5,6 +5,25 @@ namespace interpreter.Parsing
 {
     public static class OpcodeManager
     {
+        private static readonly HashSet<byte> VariableKeywords = InitializeVariableKeywords();
+        private static HashSet<byte> InitializeVariableKeywords()
+        {
+            var keywords = new HashSet<byte>();
+            
+            for (int i = 0; i < VirtualMachine.MAX_REGISTERS; i++)
+            {
+                keywords.Add(Keywords.list[$"REG{i}"]);
+            }
+
+            string[] otherVars = { "INPUT", "OUTPUT", "STACK", "RAM", "COUNTER" };
+            foreach (var varName in otherVars)
+            {
+                keywords.Add(Keywords.list[varName]);
+            }
+            
+            return keywords;
+        }
+
         private const byte ARG1_LITERAL_MASK = 1 << 7;
         private const byte ARG2_LITERAL_MASK = 1 << 6;
 
@@ -77,28 +96,11 @@ namespace interpreter.Parsing
 
         private static bool IsRegisterOrVariable(string value)
         {
-            if (IsRegisterFormat(value))
-                return true;
-
-            var variableKeywords = new[]
+            if (Keywords.list.TryGetValue(value, out byte keywordValue))
             {
-                Keywords.list["INPUT"],
-                Keywords.list["OUTPUT"],
-                Keywords.list["STACK"],
-                Keywords.list["RAM"],
-                Keywords.list["COUNTER"]
-            };
-
-            return variableKeywords.Contains(Keywords.list[value]);
-        }
-
-        private static bool IsRegisterFormat(string value)
-        {
-            if (value.Length == 4 && value.StartsWith("REG", StringComparison.OrdinalIgnoreCase))
-            {
-                char lastChar = value[3];
-                return lastChar >= '0' && lastChar <= '0' + (VirtualMachine.MAX_REGISTERS - 1);
+                return VariableKeywords.Contains(keywordValue);
             }
+            
             return false;
         }
     }
