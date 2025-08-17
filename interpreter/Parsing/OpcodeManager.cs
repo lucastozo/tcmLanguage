@@ -15,7 +15,13 @@ namespace interpreter.Parsing
                 keywords.Add(Keywords.list[$"REG{i}"]);
             }
 
-            string[] otherVars = { "INPUT", "OUTPUT", "STACK", "RAM", "COUNTER" };
+            string[] otherVars = {
+                "INPUT",
+                "OUTPUT",
+                "STACK",
+                "RAM",
+                "COUNTER"
+            };
             foreach (var varName in otherVars)
             {
                 keywords.Add(Keywords.list[varName]);
@@ -61,7 +67,7 @@ namespace interpreter.Parsing
 
         private static bool IsLiteralValue(string value, ParserContext context)
         {
-            if (IsNumericLiteral(value))
+            if (value.All(char.IsDigit) && !string.IsNullOrEmpty(value))
                 return true;
 
             if (context.Constants.ContainsKey(value))
@@ -80,11 +86,6 @@ namespace interpreter.Parsing
                 return false;
 
             return true;
-        }
-
-        private static bool IsNumericLiteral(string value)
-        {
-            return value.All(char.IsDigit) && !string.IsNullOrEmpty(value);
         }
 
         private static bool ContainsOperators(string value)
