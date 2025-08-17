@@ -41,7 +41,7 @@ namespace interpreter.Parsing
         {
             return GetInstructionsWithSettings(pathToFile).Item1;
         }
-    
+
         private static List<Instruction> BuildInstructions(ParserContext context, ParserSettings settings)
         {
             List<Instruction> instructions = new List<Instruction>();
@@ -50,38 +50,36 @@ namespace interpreter.Parsing
             {
                 int originalLineNum = context.OriginalLineNumbers[i];
                 string[] parts = context.RawInstructionLines[i].Split(' ');
-                List<byte> bParts = new();
-
                 var instructionSettings = context.InstructionSettings[i];
 
-                foreach (var part in parts)
-                {
-                    byte value = ExpressionEvaluator.EvaluateExpression(part, context, originalLineNum, instructionSettings.Overflow);
-                    bParts.Add(value);
-                }
+                List<byte> bParts = ProcessInstructionParts(parts, context, originalLineNum, instructionSettings);
 
-                if (bParts.Count == 1)
+                if (bParts.Count != 4)
                 {
-                    byte opcode = bParts[0];
-
-                    if (opcode >= Opcodes.SYSTEM_INSTRUCTION_START)
-                    {
-                        bParts.AddRange([0, 0, 0]); // Dummy values
-                    }
-                    else
-                    {
-                        throw new Exception($"Invalid instruction at line {originalLineNum}: not a valid zero-operand instruction");
-                    }
-                }
-                else if (bParts.Count != 4)
-                {
-                    throw new Exception($"Invalid instruction at line {originalLineNum}: must have exactly 4 operands or be a valid zero-operand instruction");
+                    throw new Exception($"Invalid instruction at line {originalLineNum}");
                 }
 
                 instructions.Add(new Instruction(bParts[0], bParts[1], bParts[2], bParts[3]));
             }
 
             return instructions;
+        }
+
+        private static List<byte> ProcessInstructionParts(string[] parts, ParserContext context, int lineNumber, ParserSettings instructionSettings)
+        {
+            List<byte> bParts = new();
+
+            byte baseOpcode = ExpressionEvaluator.EvaluateExpression(parts[0], context, lineNumber, instructionSettings.Overflow);
+            byte finalOpcode = OpcodeManager.BuildOpcode(baseOpcode, parts[1], parts[2], context, lineNumber);
+            bParts.Add(finalOpcode);
+            
+            for (int i = 1; i < parts.Length; i++)
+            {
+                byte value = ExpressionEvaluator.EvaluateExpression(parts[i], context, lineNumber, instructionSettings.Overflow);
+                bParts.Add(value);
+            }
+
+            return bParts;
         }
     }
 }
