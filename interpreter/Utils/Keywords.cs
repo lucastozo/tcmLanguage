@@ -37,6 +37,7 @@ namespace interpreter.Utils
             ["OR"] = Opcodes.OR,
             ["OUTPUT"] = 7,
             ["PREVIOUS"] = 65,
+            ["PRINT"] = 64,
             ["RAM"] = 128,
             ["REG0"] = 0,
             ["REG1"] = 1,

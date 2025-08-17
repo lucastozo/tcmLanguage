@@ -10,7 +10,7 @@ namespace interpreter.Parsing
             int instructionIndex = 0;
 
             context.SubroutineAddresses.Clear(); // Clear previous subroutine addresses
-            
+
             var currentSettings = new ParserSettings
             {
                 Overflow = settings.Overflow,
@@ -26,9 +26,16 @@ namespace interpreter.Parsing
                 line = string.Join(" ", line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
+                string completedLine = InstructionCompleter.CompleteInstruction(line, i + 1);
+                if (completedLine != line)
+                {
+                    Log.PrintMessage($"Line completed: '{line}' -> '{completedLine}'");
+                    line = completedLine;
+                }
+
                 string[] parts = line.Split(' ');
 
-                 // Handle pragma directives
+                // Handle pragma directives
                 if (PragmaProcessor.ProcessPragma(parts, i + 1, currentSettings))
                 {
                     continue;
@@ -56,7 +63,7 @@ namespace interpreter.Parsing
                     ProcessSubroutine(parts, i + 1, context, instructionIndex);
                     continue;
                 }
-                
+
                 var settingsSnapshot = new ParserSettings
                 {
                     Overflow = currentSettings.Overflow,
@@ -72,31 +79,31 @@ namespace interpreter.Parsing
 
             return context;
         }
-    
+
         private static void ProcessConstant(string[] parts, int lineNumber, ParserContext context)
         {
-            if (parts.Length != 3) 
+            if (parts.Length != 3)
                 throw new Exception($"Invalid const declaration at line {lineNumber}");
-            
+
             if (!byte.TryParse(parts[2], out byte constVal))
             {
                 throw new Exception($"Invalid const value at line {lineNumber}");
             }
-    
+
             context.Constants[parts[1]] = constVal;
         }
-    
+
         private static void ProcessLabel(string[] parts, int lineNumber, ParserContext context, int instructionIndex)
         {
-            if (parts.Length != 2) 
+            if (parts.Length != 2)
                 throw new Exception($"Invalid label at line {lineNumber}");
-            
+
             context.Labels.Add(parts[1], instructionIndex);
         }
-    
+
         private static void ProcessSubroutine(string[] parts, int lineNumber, ParserContext context, int instructionIndex)
         {
-            if (parts.Length != 2) 
+            if (parts.Length != 2)
                 throw new Exception($"Invalid subroutine declaration at line {lineNumber}");
 
             int address = instructionIndex;
