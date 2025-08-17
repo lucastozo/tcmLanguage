@@ -51,6 +51,11 @@ namespace interpreter.Parsing
                 int originalLineNum = context.OriginalLineNumbers[i];
                 string[] parts = context.RawInstructionLines[i].Split(' ');
                 var instructionSettings = context.InstructionSettings[i];
+                
+                if (parts.Length < 3)
+                {
+                    throw new Exception($"Invalid instruction format at line {originalLineNum}");
+                }
 
                 List<byte> bParts = ProcessInstructionParts(parts, context, originalLineNum, instructionSettings);
 
