@@ -7,7 +7,7 @@ namespace interpreter.Core
     {
         private VirtualMachine vm;
         private List<ParserSettings> instructionSettings;
-        private const byte RAM_ADDRESS_CONTROLLER = 5; // REG5 controls the address of RAM
+        private const byte REG_RAM_ADDRESS = 5; // REG5 controls the address of RAM
         
         public Interpreter(VirtualMachine vm)
         {
@@ -41,21 +41,11 @@ namespace interpreter.Core
     
         private byte GetVariable(byte variableCode)
         {
-            // Use when "variables" are mentioned in Arguments
-            /*
-                The possible "variables" are:
-                REG0, REG1, REG2, REG3, REG4, REG5
-                INPUT
-                OUTPUT
-                STACK
-                RAM
-            */
-    
             if (variableCode <= VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
             if (variableCode == Keywords.list["INPUT"]) return GetUserInput();
             if (variableCode == Keywords.list["OUTPUT"]) return vm.Output;
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
-            if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[RAM_ADDRESS_CONTROLLER]];
+            if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
     
             return 0;
         }
@@ -96,7 +86,7 @@ namespace interpreter.Core
             }
             if (variableCode == Keywords.list["RAM"])
             {
-                vm.RAM[vm.Registers[RAM_ADDRESS_CONTROLLER]] = value;
+                vm.RAM[vm.Registers[REG_RAM_ADDRESS]] = value;
                 return "RAM";
             }
             if (variableCode == Keywords.list["COUNTER"])
@@ -109,7 +99,7 @@ namespace interpreter.Core
     
         private bool OpcodeIsConditional(byte opcode)
         {
-            return opcode == Opcodes.IF_EQL || opcode == Opcodes.IF_GOE || opcode == Opcodes.IF_GRT || opcode == Opcodes.IF_LES || opcode == Opcodes.IF_LOE || opcode == Opcodes.IF_NEQ;
+            return opcode >= Opcodes.IF_EQL && opcode <= Opcodes.IF_GOE;
         }
     
         private bool IsSubroutineAddress(byte address)
@@ -248,7 +238,7 @@ namespace interpreter.Core
                     Log.PrintMessage($"Return address {vm.IP} pushed to stack");
                 }
     
-                vm.IP = (byte)(workingInstr.Destination);
+                vm.IP = workingInstr.Destination;
                 Log.PrintMessage($"Value {vm.IP} moved to Instruction Pointer");
                 return;
             }
