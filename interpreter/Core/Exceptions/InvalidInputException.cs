@@ -1,10 +1,10 @@
 namespace interpreter.Core
 {
-    public class InvalidInputException : Exception
+    internal class InvalidInputException : Exception
     {
-        public InvalidInputException() : base("Invalid input provided") { }
+        internal InvalidInputException() : base("Invalid input provided") { }
 
-        public InvalidInputException(string? input)
+        internal InvalidInputException(string? input)
             : base($"Invalid input provided: \"{input}\"") { }
     }
 }
