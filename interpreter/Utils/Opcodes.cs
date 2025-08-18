@@ -27,5 +27,6 @@ namespace interpreter.Utils
     
         // System instructions, 250 - 255
         public const byte HALT = 250;
+        public const byte WAIT = 251;
     }
 }

@@ -165,11 +165,12 @@ namespace interpreter.Core
         private void Execute(Instruction instr)
         {
             Log.PrintMessage($"Executing instruction: {instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}");
-    
+
             // Handle system instructions before masking
             if (instr.Opcode >= Opcodes.SYSTEM_INSTRUCTION_START) // System instruction range
             {
                 ExecuteSystemInstruction(instr);
+                return;
             }
     
             Instruction workingInstr = new Instruction(instr.Opcode, instr.Arg1, instr.Arg2, instr.Destination);
@@ -267,12 +268,15 @@ namespace interpreter.Core
             Log.PrintMessage("Instruction executed");
         }
     
-        private bool ExecuteSystemInstruction(Instruction instr)
+        private void ExecuteSystemInstruction(Instruction instr)
         {
             switch (instr.Opcode)
             {
                 case Opcodes.HALT:
                     throw new ProgramHaltException();
+                case Opcodes.WAIT:
+                    Thread.Sleep(instr.Arg1);
+                    break;
                 default:
                     throw new NotImplementedException($"System instruction {instr.Opcode} not implemented");
             }

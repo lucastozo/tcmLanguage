@@ -11,6 +11,11 @@ namespace interpreter.Parsing
                 pattern: ["HALT"],
                 expansion: ["HALT", "0", "0", "0"]
             ),
+
+            ["WAIT"] = new InstructionTemplate(
+                pattern: ["WAIT", "{MS}"],
+                expansion: ["WAIT", "{MS}", "0", "0"]
+            ), 
             
             ["PREVIOUS"] = new InstructionTemplate(
                 pattern: ["PREVIOUS", "{VARIABLE}"],

@@ -54,6 +54,7 @@ namespace interpreter.Utils
             ["SUB"] = Opcodes.SUB,
             ["SUBROUTINE"] = 255,
             ["TO"] = 0,
+            ["WAIT"] = Opcodes.WAIT,
             ["XOR"] = Opcodes.XOR
         };
     }
