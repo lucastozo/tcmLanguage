@@ -1,4 +1,5 @@
 using interpreter.Utils;
+using System.Text.RegularExpressions;
 
 namespace interpreter.Parsing
 {
@@ -23,7 +24,10 @@ namespace interpreter.Parsing
                 string line = lines[i];
                 int commentIdx = line.IndexOf('#');
                 if (commentIdx >= 0) line = line[..commentIdx];
-                line = string.Join(" ", line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
+
+                var matches = Regex.Matches(line.Trim(), @"('.')|(\S+)");
+                line = string.Join(" ", matches.Select(m => ProcessCharacterLiteral(m.Value)));
+
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 line = line.ToUpper();
 
@@ -111,6 +115,16 @@ namespace interpreter.Parsing
             context.Subroutines.Add(parts[1], address);
             context.SubroutineAddresses.Add(address); // Store for interpreter access
             Log.PrintMessage($"[PARSER] Subroutine '{parts[1]}' registered at address {address}");
+        }
+
+        private static string ProcessCharacterLiteral(string token)
+        {
+            if (token.Length == 3 && token[0] == '\'' && token[2] == '\'')
+            {
+                char c = token[1];
+                return ((int)c).ToString(); // ascii
+            }
+            return token;
         }
     }
 }
