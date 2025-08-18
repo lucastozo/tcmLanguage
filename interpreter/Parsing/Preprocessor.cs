@@ -72,7 +72,8 @@ namespace interpreter.Parsing
                 var settingsSnapshot = new ParserSettings
                 {
                     Overflow = currentSettings.Overflow,
-                    CharOutput = currentSettings.CharOutput
+                    CharOutput = currentSettings.CharOutput,
+                    SignedMode = currentSettings.SignedMode
                 };
                 context.InstructionSettings.Add(settingsSnapshot);
 

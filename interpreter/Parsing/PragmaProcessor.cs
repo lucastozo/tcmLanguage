@@ -28,6 +28,11 @@ namespace interpreter.Parsing
                         if (enable) Log.PrintMessage($"[PARSER] Pragma: character output mode enabled");
                         else Log.PrintMessage($"[PARSER] Pragma: character output mode disabled");
                         break;
+                    case "signed":
+                        settings.SignedMode = enable;
+                        if (enable) Log.PrintMessage($"[PARSER] Pragma: signed output mode enabled");
+                        else Log.PrintMessage($"[PARSER] Pragma: signed output mode disabled");
+                        break;
                     default:
                         throw new Exception($"Unknown pragma option '{parts[1]}' at line {lineNumber}.");
                 }

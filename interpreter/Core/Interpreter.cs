@@ -235,14 +235,20 @@ namespace interpreter.Core
             if (workingInstr.Destination == Keywords.list["OUTPUT"])
             {
                 bool charMode = false;
+                bool signedMode = false;
                 if (instructionSettings != null && vm.IP < instructionSettings.Count)
                 {
                     charMode = instructionSettings[vm.IP].CharOutput;
+                    signedMode = instructionSettings[vm.IP].SignedMode;
                 }
 
                 if (charMode)
                 {
                     Console.Write((char)vm.Output);
+                }
+                else if (signedMode)
+                {
+                    Console.WriteLine((sbyte)vm.Output);
                 }
                 else
                 {
