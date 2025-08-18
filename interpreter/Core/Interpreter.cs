@@ -185,30 +185,47 @@ namespace interpreter.Core
             Log.PrintMessage($"Opcode decoded to: {baseOpcode}");
     
             // Execute OPCODE
-            byte result = baseOpcode switch
+            int _result = baseOpcode switch
             {
-                Opcodes.ADD => (byte)(workingInstr.Arg1 + workingInstr.Arg2),
-                Opcodes.SUB => (byte)(workingInstr.Arg1 - workingInstr.Arg2),
-                Opcodes.AND => (byte)(workingInstr.Arg1 & workingInstr.Arg2),
-                Opcodes.OR => (byte)(workingInstr.Arg1 | workingInstr.Arg2),
-                Opcodes.NOT_A => (byte)~workingInstr.Arg1,
-                Opcodes.XOR => (byte)(workingInstr.Arg1 ^ workingInstr.Arg2),
-                Opcodes.MULTIPLY => (byte)(workingInstr.Arg1 * workingInstr.Arg2),
-                Opcodes.DIV => (byte)(workingInstr.Arg1 / workingInstr.Arg2),
-                Opcodes.MOD => (byte)(workingInstr.Arg1 % workingInstr.Arg2),
-                Opcodes.SHL => (byte)(workingInstr.Arg1 << workingInstr.Arg2),
-                Opcodes.SHR => (byte)(workingInstr.Arg1 >> workingInstr.Arg2),
-                Opcodes.ASHR => (byte)(((sbyte)workingInstr.Arg1) >> workingInstr.Arg2),
-                Opcodes.ROL => (byte)((workingInstr.Arg1 << workingInstr.Arg2) | (workingInstr.Arg1 >> (8 - workingInstr.Arg2))),
-                Opcodes.ROR => (byte)((workingInstr.Arg1 >> workingInstr.Arg2) | (workingInstr.Arg1 << (8 - workingInstr.Arg2))),
-                Opcodes.IF_EQL => (byte)(workingInstr.Arg1 == workingInstr.Arg2 ? 1 : 0),
-                Opcodes.IF_NEQ => (byte)(workingInstr.Arg1 != workingInstr.Arg2 ? 1 : 0),
-                Opcodes.IF_LES => (byte)(workingInstr.Arg1 < workingInstr.Arg2 ? 1 : 0),
-                Opcodes.IF_LOE => (byte)(workingInstr.Arg1 <= workingInstr.Arg2 ? 1 : 0),
-                Opcodes.IF_GRT => (byte)(workingInstr.Arg1 > workingInstr.Arg2 ? 1 : 0),
-                Opcodes.IF_GOE => (byte)(workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0),
+                Opcodes.ADD => workingInstr.Arg1 + workingInstr.Arg2,
+                Opcodes.SUB => workingInstr.Arg1 - workingInstr.Arg2,
+                Opcodes.AND => workingInstr.Arg1 & workingInstr.Arg2,
+                Opcodes.OR => workingInstr.Arg1 | workingInstr.Arg2,
+                Opcodes.NOT_A => ~workingInstr.Arg1,
+                Opcodes.XOR => workingInstr.Arg1 ^ workingInstr.Arg2,
+                Opcodes.MULTIPLY => workingInstr.Arg1 * workingInstr.Arg2,
+                Opcodes.DIV => workingInstr.Arg1 / workingInstr.Arg2,
+                Opcodes.MOD => workingInstr.Arg1 % workingInstr.Arg2,
+                Opcodes.SHL => workingInstr.Arg1 << workingInstr.Arg2,
+                Opcodes.SHR => workingInstr.Arg1 >> workingInstr.Arg2,
+                Opcodes.ASHR => ((sbyte)workingInstr.Arg1) >> workingInstr.Arg2,
+                Opcodes.ROL => (workingInstr.Arg1 << workingInstr.Arg2) | (workingInstr.Arg1 >> (8 - workingInstr.Arg2)),
+                Opcodes.ROR => (workingInstr.Arg1 >> workingInstr.Arg2) | (workingInstr.Arg1 << (8 - workingInstr.Arg2)),
+                Opcodes.IF_EQL => workingInstr.Arg1 == workingInstr.Arg2 ? 1 : 0,
+                Opcodes.IF_NEQ => workingInstr.Arg1 != workingInstr.Arg2 ? 1 : 0,
+                Opcodes.IF_LES => workingInstr.Arg1 < workingInstr.Arg2 ? 1 : 0,
+                Opcodes.IF_LOE => workingInstr.Arg1 <= workingInstr.Arg2 ? 1 : 0,
+                Opcodes.IF_GRT => workingInstr.Arg1 > workingInstr.Arg2 ? 1 : 0,
+                Opcodes.IF_GOE => workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0,
                 _ => throw new NotImplementedException($"Opcode {baseOpcode} not implemented")
             };
+
+            bool allowOverflow = false;
+            if (instructionSettings != null && vm.IP < instructionSettings.Count)
+            {
+                allowOverflow = instructionSettings[vm.IP].Overflow;
+            }
+            
+            if (!allowOverflow && _result < byte.MinValue)
+            {
+                throw new ArithmeticUnderflowException(instr, _result);
+            }
+            else if (!allowOverflow && _result > byte.MaxValue)
+            {
+                throw new ArithmeticOverflowException(instr, _result);
+            }
+
+            byte result = (byte)_result;
     
             Log.PrintMessage($"Result of ALU: {result}");
     
