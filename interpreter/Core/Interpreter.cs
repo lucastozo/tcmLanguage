@@ -41,13 +41,14 @@ namespace interpreter.Core
     
         private byte GetVariable(byte variableCode)
         {
-            if (variableCode <= VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
+            if (variableCode < VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
             if (variableCode == Keywords.list["INPUT"]) return GetUserInput();
             if (variableCode == Keywords.list["OUTPUT"]) return vm.Output;
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
             if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
-    
-            return 0;
+            if (variableCode == Keywords.list["COUNTER"]) return vm.IP;
+
+            throw new InvalidStorageAreaException(variableCode);
         }
 
         private byte GetUserInput()
@@ -65,7 +66,7 @@ namespace interpreter.Core
             throw new InvalidInputException();
         }
     
-        private string? SetVariable(byte variableCode, byte value)
+        private string SetVariable(byte variableCode, byte value)
         {
             // Use when "variables" are mentioned in destination (last byte)
     
@@ -94,7 +95,8 @@ namespace interpreter.Core
                 vm.IP = value;
                 return "COUNTER";
             }
-            return null;
+
+            throw new InvalidStorageAreaException(variableCode);
         }
     
         private bool OpcodeIsConditional(byte opcode)
