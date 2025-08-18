@@ -63,7 +63,7 @@ namespace interpreter.Core
                 return value;
             }
 
-            throw new InvalidInputException();
+            throw new InvalidInputException(input);
         }
     
         private string SetVariable(byte variableCode, byte value)
@@ -207,7 +207,6 @@ namespace interpreter.Core
                 Opcodes.IF_LOE => (byte)(workingInstr.Arg1 <= workingInstr.Arg2 ? 1 : 0),
                 Opcodes.IF_GRT => (byte)(workingInstr.Arg1 > workingInstr.Arg2 ? 1 : 0),
                 Opcodes.IF_GOE => (byte)(workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0),
-                Opcodes.HALT => throw new ProgramHaltException(),
                 _ => throw new NotImplementedException($"Opcode {baseOpcode} not implemented")
             };
     
@@ -218,25 +217,9 @@ namespace interpreter.Core
                 Log.PrintMessage("Conditional detected");
                 if (result == 0) return; // Conditional was not met
     
-                // Check if explicit "CALL NOW SUBROUTINE" instruction
-                bool isExplicitSubroutineCall = workingInstr.Opcode == Keywords.list["CALL"] &&
-                                                workingInstr.Arg1 == Keywords.list["NOW"] &&
-                                                workingInstr.Arg2 == Keywords.list["SUBROUTINE"];
-    
-                // Check if destination is a subroutine address (for conditional calls)
-                bool isConditionalSubroutineCall = IsSubroutineAddress(workingInstr.Destination);
-    
-                if (isExplicitSubroutineCall || isConditionalSubroutineCall)
+                if (IsSubroutineAddress(workingInstr.Destination))
                 {
-                    if (isExplicitSubroutineCall)
-                    {
-                        Log.PrintMessage("Explicit subroutine call detected");
-                    }
-                    else
-                    {
-                        Log.PrintMessage("Conditional subroutine call detected");
-                    }
-    
+                    Log.PrintMessage("Subroutine detected");
                     vm.CallStack.Push((byte)(vm.IP + 1));
                     Log.PrintMessage($"Return address {vm.IP} pushed to stack");
                 }
@@ -246,7 +229,7 @@ namespace interpreter.Core
                 return;
             }
     
-            string? variableChanged = SetVariable(workingInstr.Destination, result);
+            string variableChanged = SetVariable(workingInstr.Destination, result);
             Log.PrintMessage($"Variable {variableChanged} received value {result}");
 
             if (workingInstr.Destination == Keywords.list["OUTPUT"])
