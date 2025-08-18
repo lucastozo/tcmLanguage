@@ -11,6 +11,7 @@ namespace interpreter.Utils
             ["BACK"] = 8,
             ["CALL"] = 210,
             ["CALLER"] = 6,
+            ["CLEAR"] = Opcodes.CLEAR,
             ["COPY_CONST"] = 192,
             ["COUNTER"] = 6,
             ["DIV"] = Opcodes.DIV,

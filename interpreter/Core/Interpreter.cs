@@ -285,6 +285,9 @@ namespace interpreter.Core
                 case Opcodes.WAIT:
                     Thread.Sleep(instr.Arg1);
                     break;
+                case Opcodes.CLEAR:
+                    Console.Clear();
+                    break;
                 default:
                     throw new NotImplementedException($"System instruction {instr.Opcode} not implemented");
             }

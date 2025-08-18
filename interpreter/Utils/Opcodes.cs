@@ -3,7 +3,7 @@ namespace interpreter.Utils
     public static class Opcodes
     {
         public const byte SYSTEM_INSTRUCTION_START = 250;
-    
+
         public const byte ADD = 0;
         public const byte SUB = 1;
         public const byte AND = 2;
@@ -24,9 +24,10 @@ namespace interpreter.Utils
         public const byte IF_LOE = 19;
         public const byte IF_GRT = 20;
         public const byte IF_GOE = 21;
-    
+
         // System instructions, 250 - 255
         public const byte HALT = 250;
         public const byte WAIT = 251;
+        public const byte CLEAR = 252;
     }
 }
