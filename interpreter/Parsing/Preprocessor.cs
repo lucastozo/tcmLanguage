@@ -25,6 +25,7 @@ namespace interpreter.Parsing
                 if (commentIdx >= 0) line = line[..commentIdx];
                 line = string.Join(" ", line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
                 if (string.IsNullOrWhiteSpace(line)) continue;
+                line = line.ToUpper();
 
                 string completedLine = InstructionCompleter.CompleteInstruction(line, i + 1);
                 if (completedLine != line)
