@@ -81,8 +81,8 @@ namespace interpreter.Utils
 
             var options = new List<(string Option, string Description)>
             {
-                ("--help, -h", "Show this help message and exit."),
-                ("--version, -v", "Show the version of the interpreter"),
+                ("--help, -h", "Show this help message."),
+                ("--version, -v", "Show the installed version of the interpreter."),
                 ("",""), // Just for newline
                 ("--log, -l", "Enable logging and display log messages in the terminal."),
                 ("--write, -w", "Write log messages to a file (requires logging to be enabled)."),
