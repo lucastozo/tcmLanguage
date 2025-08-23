@@ -5,7 +5,7 @@ namespace interpreter.Utils
         public static readonly IReadOnlyDictionary<string, byte> list = new Dictionary<string, byte>
         {
             ["ADD"] = Opcodes.ADD,
-            ["ADDRESS"] = 5,
+            ["ADDRESS"] = Core.Interpreter.REG_RAM_ADDRESS,
             ["AND"] = Opcodes.AND,
             ["ASHR"] = Opcodes.ASHR,
             ["CALL"] = 210,
