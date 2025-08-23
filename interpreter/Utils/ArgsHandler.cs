@@ -6,7 +6,11 @@ namespace interpreter.Utils
     {
         public static string Handle(string[] args)
         {
-            if (args.Length == 0) PrintHelp();
+            if (args.Length == 0)
+            {
+                PrintHelp();
+                Environment.Exit(0);
+            }
 
             foreach (string arg in args)
             {
