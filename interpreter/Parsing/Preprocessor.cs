@@ -89,6 +89,9 @@ namespace interpreter.Parsing
             if (parts.Length != 3)
                 throw new Exception($"Invalid const declaration at line {lineNumber}");
 
+            if (Utils.Keywords.list.ContainsKey(parts[1]))
+                throw new Exception($"Const name is a reserved keyword at line {lineNumber}");
+
             context.Constants[parts[1]] = parts[2];
         }
 
