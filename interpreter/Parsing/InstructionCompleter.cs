@@ -34,12 +34,12 @@ namespace interpreter.Parsing
 
             ["RETURN"] = new InstructionTemplate(
                 pattern: ["RETURN"],
-                expansion: ["RETURN", "BACK", "TO", "CALLER"]
+                expansion: ["RETURN", "STACK", "TO", "COUNTER"]
             ),
 
             ["CALL"] = new InstructionTemplate(
                 pattern: ["CALL", "{SUBROUTINE}"],
-                expansion: ["CALL", "NOW", "SUBROUTINE", "{SUBROUTINE}"]
+                expansion: ["CALL", "0", "255", "{SUBROUTINE}"]
             ),
 
             ["PRINT"] = new InstructionTemplate(
@@ -49,7 +49,7 @@ namespace interpreter.Parsing
 
             ["GOTO"] = new InstructionTemplate(
                 pattern: ["GOTO", "{LABEL}"],
-                expansion: ["JMP", "NOW", "TO", "{LABEL}"]
+                expansion: ["GOTO", "0", "0", "{LABEL}"]
             )
         };
 
