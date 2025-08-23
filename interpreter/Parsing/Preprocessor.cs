@@ -44,9 +44,9 @@ namespace interpreter.Parsing
                     continue;
                 }
 
-                if (instructionIndex > byte.MaxValue)
+                if (instructionIndex > int.MaxValue)
                 {
-                    throw new Exception($"Program exceeds maximum of {byte.MaxValue} instructions at line {i + 1}");
+                    throw new Exception($"Program exceeds maximum of {int.MaxValue} instructions");
                 }
 
                 if (parts[0].Equals("const", StringComparison.OrdinalIgnoreCase))

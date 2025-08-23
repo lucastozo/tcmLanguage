@@ -42,7 +42,7 @@ namespace interpreter.Core
             if (variableCode == Keywords.list["OUTPUT"]) return vm.Output;
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
             if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
-            if (variableCode == Keywords.list["COUNTER"]) return vm.IP;
+            if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
 
             throw new InvalidStorageAreaException(variableCode);
         }
@@ -138,10 +138,10 @@ namespace interpreter.Core
                     int oldIP = vm.IP;
                     Execute(program[vm.IP]);
 
-                    if (vm.IP >= byte.MaxValue)
+                    if (vm.IP >= int.MaxValue)
                     {
                         /*
-                         This is to prevent endless running a program with 255
+                         This is to prevent endless running a program with maxValue
                          instructions, without it, the pointer would overflow to 0
                          and restart endlessly
                         */
