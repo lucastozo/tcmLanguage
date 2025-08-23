@@ -54,12 +54,13 @@ catch (Exception e)
 
 Log.PrintMessage("File loaded sucessfully");
 
-VirtualMachine vm = new VirtualMachine();
-Interpreter interpreter = new Interpreter(vm);
 try
 {
     var (instructions, settings) = Parser.GetInstructionsWithSettings(filePath);
-    interpreter.SetInstructionSettings(settings);
+
+    VirtualMachine vm = new VirtualMachine();
+    Interpreter interpreter = new Interpreter(vm, settings);
+    
     interpreter.Run(instructions);
     Log.PrintMessage("-- END OF PROGRAM --");
 }
