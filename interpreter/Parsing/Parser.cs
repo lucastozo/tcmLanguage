@@ -5,7 +5,6 @@ namespace interpreter.Parsing
 {
     class Parser
     {
-        // Keep for backward compatibility with Interpreter
         internal static HashSet<int> SubroutineAddresses { get; private set; } = new HashSet<int>();
     
         public static (List<Instruction>, List<ParserSettings>) GetInstructionsWithSettings(string pathToFile)
@@ -14,15 +13,12 @@ namespace interpreter.Parsing
     
             var settings = new ParserSettings();
             string[] lines = File.ReadAllLines(pathToFile);
-            
-            // Preprocess the file
+
             ParserContext context = Preprocessor.ProcessFile(lines, settings);
-            
-            // Update static property for backward compatibility with Interpreter
+
             SubroutineAddresses = context.SubroutineAddresses;
-    
-            // Build instructions
-            List<Instruction> instructions = BuildInstructions(context, settings);
+
+            List<Instruction> instructions = BuildInstructions(context);
     
             if (Log.ShowLogs)
             {
@@ -42,7 +38,7 @@ namespace interpreter.Parsing
             return GetInstructionsWithSettings(pathToFile).Item1;
         }
 
-        private static List<Instruction> BuildInstructions(ParserContext context, ParserSettings settings)
+        private static List<Instruction> BuildInstructions(ParserContext context)
         {
             List<Instruction> instructions = new List<Instruction>();
 
@@ -52,17 +48,12 @@ namespace interpreter.Parsing
                 string[] parts = context.RawInstructionLines[i].Split(' ');
                 var instructionSettings = context.InstructionSettings[i];
                 
-                if (parts.Length < 3)
-                {
-                    throw new Exception($"Invalid instruction format at line {originalLineNum}");
-                }
-
-                List<byte> bParts = ProcessInstructionParts(parts, context, originalLineNum, instructionSettings);
-
-                if (bParts.Count != 4)
+                if (parts.Count() != 4)
                 {
                     throw new Exception($"Invalid instruction at line {originalLineNum}");
                 }
+
+                List<byte> bParts = ProcessInstructionParts(parts, context, originalLineNum, instructionSettings);
 
                 instructions.Add(new Instruction(bParts[0], bParts[1], bParts[2], bParts[3]));
             }

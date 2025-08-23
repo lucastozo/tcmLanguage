@@ -10,12 +10,11 @@ namespace interpreter.Parsing
             var context = new ParserContext();
             int instructionIndex = 0;
 
-            context.SubroutineAddresses.Clear(); // Clear previous subroutine addresses
-
             var currentSettings = new ParserSettings
             {
                 Overflow = settings.Overflow,
-                CharOutput = settings.CharOutput
+                CharOutput = settings.CharOutput,
+                SignedMode = settings.SignedMode
             };
 
             // Preprocess
@@ -40,7 +39,6 @@ namespace interpreter.Parsing
 
                 string[] parts = line.Split(' ');
 
-                // Handle pragma directives
                 if (PragmaProcessor.ProcessPragma(parts, i + 1, currentSettings))
                 {
                     continue;
@@ -114,7 +112,7 @@ namespace interpreter.Parsing
 
             int address = instructionIndex;
             context.Subroutines.Add(parts[1], address);
-            context.SubroutineAddresses.Add(address); // Store for interpreter access
+            context.SubroutineAddresses.Add(address); // for interpreter access
             Log.PrintMessage($"[PARSER] Subroutine '{parts[1]}' registered at address {address}");
         }
 
