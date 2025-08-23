@@ -4,7 +4,8 @@ using interpreter.Utils;
 
 string filePath = ArgsHandler.Handle(args);
 
-if (Log.ShowLogs) Log.PrintMessage("Executing program with logs enabled");
+Log.PrintMessage(ArgsHandler.GetVersion()); // Print interpreter version in log
+Log.PrintMessage("Executing program with logs enabled");
 if (Log.WriteToFile) Log.PrintMessage("Logs will be written to a file");
 
 Log.PrintMessage($"Trying to load file {filePath}...");

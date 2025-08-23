@@ -37,25 +37,9 @@ namespace interpreter.Parsing
         {
             byte finalOpcode = baseOpcode;
 
-            if (IsLiteralValue(arg1, context))
-            {
-                finalOpcode |= ARG1_LITERAL_MASK;
-                Log.PrintMessage($"[OPCODE MANAGER] Setting ARG1 as literal for '{arg1}' at line {lineNumber}");
-            }
-            else
-            {
-                Log.PrintMessage($"[OPCODE MANAGER] Treating ARG1 as register/variable for '{arg1}' at line {lineNumber}");
-            }
+            if (IsLiteralValue(arg1, context)) finalOpcode |= ARG1_LITERAL_MASK;
 
-            if (IsLiteralValue(arg2, context))
-            {
-                finalOpcode |= ARG2_LITERAL_MASK;
-                Log.PrintMessage($"[OPCODE MANAGER] Setting ARG2 as literal for '{arg2}' at line {lineNumber}");
-            }
-            else
-            {
-                Log.PrintMessage($"[OPCODE MANAGER] Treating ARG2 as register/variable for '{arg2}' at line {lineNumber}");
-            }
+            if (IsLiteralValue(arg2, context)) finalOpcode |= ARG2_LITERAL_MASK;
 
             if (finalOpcode != baseOpcode)
             {

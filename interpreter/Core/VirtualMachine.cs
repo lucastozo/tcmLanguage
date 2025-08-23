@@ -19,8 +19,9 @@ namespace interpreter.Core
             Log.PrintMessage($"Printing current state of virtual machine...");
     
             Log.PrintMessage($"Instruction Pointer: {IP}");
-    
-            string ramState = "\nRAM:\n";
+
+            Log.PrintMessage("RAM:");
+            string ramState = "";
             for (int row = 0; row < MAX_RAM / 32; row++)
             {
                 for (int col = 0; col < MAX_RAM / 8; col++)
@@ -31,21 +32,19 @@ namespace interpreter.Core
                 ramState += "\n";
             }
             Log.PrintMessage(ramState);
-    
-            string stackState = "\nSTACK:\n";
+
+            Log.PrintMessage("STACK:");
             for (int i = 0; i < CallStack.Count; i++)
             {
-                stackState += $"Item {i} of the stack: {CallStack.ElementAt(i)}\n";
+                Log.PrintMessage($"Item {i} of the stack: {CallStack.ElementAt(i)}\n");
             }
-            if (CallStack.Count == 0) stackState += "No elements in stack\n";
-            Log.PrintMessage(stackState);
-            
-            string registersState = "\nREGISTERS:\n";
+            if (CallStack.Count == 0) Log.PrintMessage("No elements in stack");
+
+            Log.PrintMessage("REGISTERS:");
             for (int i = 0; i < MAX_REGISTERS; i++)
             {
-                registersState += $"REG{i} = {Registers[i]}\n";
+                Log.PrintMessage($"REG{i} = {Registers[i]}");
             }
-            Log.PrintMessage(registersState);
             
             Log.PrintMessage();
         }

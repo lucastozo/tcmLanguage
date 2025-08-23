@@ -23,10 +23,11 @@ namespace interpreter.Utils
         public static void PrintMessage(string message = "")
         {
             if (!ShowLogs) return;
-    
-            message += "\n";
+
+            message = message.Trim() + "\n";
+            
             Console.Write(message);
-            WriteOnFile(message);
+            if (WriteToFile) WriteOnFile(message);
         }
     
         public static void PrintError(string message)
@@ -49,13 +50,6 @@ namespace interpreter.Utils
                 Console.ResetColor();
                 WriteToFile = false;
                 return;
-            }
-            
-            DateTime moment = DateTime.Now;
-    
-            if (message.Trim().Length > 0)
-            {
-                message = $"[{moment:HH:mm:ss}] {message}";
             }
     
             try

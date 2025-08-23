@@ -14,6 +14,15 @@ namespace interpreter.Parsing
             var settings = new ParserSettings();
             string[] lines = File.ReadAllLines(pathToFile);
 
+            if (Log.ShowLogs)
+            {
+                Log.PrintMessage("Original program:\n");
+                foreach (string line in lines)
+                {
+                    Log.PrintMessage(line);
+                }
+            }
+
             ParserContext context = Preprocessor.ProcessFile(lines, settings);
 
             SubroutineAddresses = context.SubroutineAddresses;
@@ -22,12 +31,11 @@ namespace interpreter.Parsing
     
             if (Log.ShowLogs)
             {
-                string programMsg = "Final program:\n";
+                Log.PrintMessage("Final program:");
                 foreach (Instruction instr in instructions)
                 {
-                    programMsg += $"{instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}\n";
+                    Log.PrintMessage($"{instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}");
                 }
-                Log.PrintMessage(programMsg);
             }
     
             return (instructions, context.InstructionSettings);
