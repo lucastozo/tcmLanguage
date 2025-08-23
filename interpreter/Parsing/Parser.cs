@@ -32,11 +32,6 @@ namespace interpreter.Parsing
     
             return (instructions, context.InstructionSettings);
         }
-        
-        public static List<Instruction> GetInstructions(string pathToFile)
-        {
-            return GetInstructionsWithSettings(pathToFile).Item1;
-        }
 
         private static List<Instruction> BuildInstructions(ParserContext context)
         {
@@ -64,6 +59,15 @@ namespace interpreter.Parsing
         private static List<byte> ProcessInstructionParts(string[] parts, ParserContext context, int lineNumber, ParserSettings instructionSettings)
         {
             List<byte> bParts = new();
+
+            // Replace constants in instruction
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (context.Constants.TryGetValue(parts[i], out string? value))
+                {
+                    parts[i] = value;
+                }
+            }
 
             byte baseOpcode = ExpressionEvaluator.EvaluateExpression(parts[0], context, lineNumber, instructionSettings.Overflow);
             byte finalOpcode = OpcodeManager.BuildOpcode(baseOpcode, parts[1], parts[2], context, lineNumber);

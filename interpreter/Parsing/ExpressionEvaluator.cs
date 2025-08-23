@@ -33,11 +33,6 @@ namespace interpreter.Parsing
                     }
                 }
     
-                if (context.Constants.TryGetValue(expression, out byte constVal))
-                {
-                    return constVal;
-                }
-    
                 if (context.Labels.TryGetValue(expression, out int labelAddr))
                 {
                     return (byte)labelAddr;

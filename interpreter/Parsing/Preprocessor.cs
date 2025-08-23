@@ -89,12 +89,7 @@ namespace interpreter.Parsing
             if (parts.Length != 3)
                 throw new Exception($"Invalid const declaration at line {lineNumber}");
 
-            if (!byte.TryParse(parts[2], out byte constVal))
-            {
-                throw new Exception($"Invalid const value at line {lineNumber}");
-            }
-
-            context.Constants[parts[1]] = constVal;
+            context.Constants[parts[1]] = parts[2];
         }
 
         private static void ProcessLabel(string[] parts, int lineNumber, ParserContext context, int instructionIndex)

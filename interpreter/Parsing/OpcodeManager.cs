@@ -70,9 +70,6 @@ namespace interpreter.Parsing
             if (value.All(char.IsDigit) && !string.IsNullOrEmpty(value))
                 return true;
 
-            if (context.Constants.ContainsKey(value))
-                return true;
-
             if (context.Labels.ContainsKey(value))
                 return true;
 
