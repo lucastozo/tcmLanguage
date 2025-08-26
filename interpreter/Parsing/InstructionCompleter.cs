@@ -58,7 +58,7 @@ namespace interpreter.Parsing
             if (string.IsNullOrWhiteSpace(line))
                 return line;
 
-            string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = Preprocessor.SplitterWithException(line, splitChar: ' ', exceptionChar: '"');
             if (parts.Length == 0)
                 return line;
 

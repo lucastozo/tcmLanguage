@@ -20,24 +20,21 @@ namespace interpreter.Parsing
             // Preprocess
             for (int i = 0; i < lines.Length; i++)
             {
-                string line = lines[i];
-                int commentIdx = line.IndexOf('#');
-                if (commentIdx >= 0) line = line[..commentIdx];
+                string rawLine = lines[i];
+                int commentIdx = rawLine.IndexOf("//");
+                if (commentIdx >= 0) rawLine = rawLine[..commentIdx];
 
-                var matches = Regex.Matches(line.Trim(), @"('.')|(\S+)");
-                line = string.Join(" ", matches.Select(m => ProcessCharacterLiteral(m.Value)));
+                if (string.IsNullOrWhiteSpace(rawLine)) continue;
+                string processedLine = rawLine.Trim();
 
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                line = line.ToUpper();
-
-                string completedLine = InstructionCompleter.CompleteInstruction(line, i + 1);
-                if (completedLine != line)
+                string completedLine = InstructionCompleter.CompleteInstruction(processedLine, i + 1);
+                if (completedLine != processedLine)
                 {
-                    Log.PrintMessage($"Line completed: '{line}' -> '{completedLine}'");
-                    line = completedLine;
+                    Log.PrintMessage($"Line completed: '{processedLine}' -> '{completedLine}'");
+                    processedLine = completedLine;
                 }
 
-                string[] parts = line.Split(' ');
+                string[] parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
 
                 if (PragmaProcessor.ProcessPragma(parts, i + 1, currentSettings))
                 {
@@ -67,6 +64,32 @@ namespace interpreter.Parsing
                     continue;
                 }
 
+                List<string> stringExpansions = StringPrintProcessor.ProcessStringPrint(parts, i + 1, currentSettings);
+                if (stringExpansions.Count > 0)
+                {
+                    for (int j = 0; j < stringExpansions.Count; j++)
+                    {
+                        string expansion = stringExpansions[j];
+
+                        if (PragmaProcessor.ProcessPragma(expansion.Split(' '), i + 1, currentSettings))
+                            continue;
+                        
+                        var expandedSettings = new ParserSettings
+                        {
+                            Overflow = currentSettings.Overflow,
+                            CharOutput = currentSettings.CharOutput,
+                            SignedMode = currentSettings.SignedMode
+                        };
+                        context.InstructionSettings.Add(expandedSettings);
+
+                        context.ProcesssedLines.Add(expansion);
+                        context.OriginalLineNumbers.Add(i + 1);
+                        instructionIndex++;
+                    }
+                    
+                    continue;
+                }
+
                 var settingsSnapshot = new ParserSettings
                 {
                     Overflow = currentSettings.Overflow,
@@ -74,10 +97,12 @@ namespace interpreter.Parsing
                     SignedMode = currentSettings.SignedMode
                 };
                 context.InstructionSettings.Add(settingsSnapshot);
-
-                context.RawInstructionLines.Add(line);
+                
+                processedLine = string.Join(" ", parts).ToUpper();
+                context.ProcesssedLines.Add(processedLine);
+                
                 context.OriginalLineNumbers.Add(i + 1);
-                Log.PrintMessage($"Line {line} preprocessed sucessfully");
+                Log.PrintMessage($"Line {rawLine} preprocessed sucessfully to {processedLine}");
                 instructionIndex++;
             }
 
@@ -94,7 +119,7 @@ namespace interpreter.Parsing
 
             if (int.TryParse(name, out _))
                 throw new Exception($"Macro name must be a identifier at line {lineNumber}");
-            
+
             if (Utils.Keywords.list.ContainsKey(name))
                 throw new Exception($"Macro name is a reserved keyword at line {lineNumber}");
 
@@ -120,14 +145,27 @@ namespace interpreter.Parsing
             Log.PrintMessage($"[PARSER] Subroutine '{parts[1]}' registered at address {address}");
         }
 
-        private static string ProcessCharacterLiteral(string token)
+        internal static string[] SplitterWithException(string str, char splitChar, char exceptionChar)
         {
-            if (token.Length == 3 && token[0] == '\'' && token[2] == '\'')
+            List<string> words = new List<string>();
+
+            string word = "";
+            bool exceptionIsOpen = false;
+            for (int i = 0; i < str.Length; i++)
             {
-                char c = token[1];
-                return ((int)c).ToString(); // ascii
+                if (str[i] == exceptionChar) exceptionIsOpen = !exceptionIsOpen;
+                if (str[i] == splitChar && !exceptionIsOpen)
+                {
+                    words.Add(word);
+                    word = "";
+                    continue;
+                }
+                word += str[i];
             }
-            return token;
+
+            if (word.Length > 0) words.Add(word);
+
+            return words.ToArray();
         }
     }
 }

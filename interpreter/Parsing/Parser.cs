@@ -45,10 +45,10 @@ namespace interpreter.Parsing
         {
             List<Instruction> instructions = new List<Instruction>();
 
-            for (int i = 0; i < context.RawInstructionLines.Count; i++)
+            for (int i = 0; i < context.ProcesssedLines.Count; i++)
             {
                 int originalLineNum = context.OriginalLineNumbers[i];
-                string[] parts = context.RawInstructionLines[i].Split(' ');
+                string[] parts = context.ProcesssedLines[i].Split(' ');
                 var instructionSettings = context.InstructionSettings[i];
                 
                 if (parts.Count() != 4)
