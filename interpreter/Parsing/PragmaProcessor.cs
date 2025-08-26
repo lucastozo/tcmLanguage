@@ -6,7 +6,7 @@ namespace interpreter.Parsing
     {
         public static bool ProcessPragma(string[] parts, int lineNumber, ParserSettings settings)
         {
-            if (!parts[0].Equals("@pragma", StringComparison.OrdinalIgnoreCase))
+            if (!parts[0].Equals("#pragma", StringComparison.OrdinalIgnoreCase))
                 return false;
     
             if (parts.Length != 3) 

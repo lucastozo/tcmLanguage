@@ -71,7 +71,7 @@ namespace interpreter.Parsing
             // Replace constants in instruction
             for (int i = 0; i < parts.Length; i++)
             {
-                if (context.Constants.TryGetValue(parts[i], out string? value))
+                if (context.Macros.TryGetValue(parts[i], out string? value))
                 {
                     parts[i] = value;
                 }

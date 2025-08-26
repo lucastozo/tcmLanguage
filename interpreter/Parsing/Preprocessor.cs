@@ -49,9 +49,9 @@ namespace interpreter.Parsing
                     throw new Exception($"Program exceeds maximum of {int.MaxValue} instructions");
                 }
 
-                if (parts[0].Equals("const", StringComparison.OrdinalIgnoreCase))
+                if (parts[0].Equals("#define", StringComparison.OrdinalIgnoreCase))
                 {
-                    ProcessConstant(parts, i + 1, context);
+                    ProcessMacro(parts, i + 1, context);
                     continue;
                 }
 
@@ -84,15 +84,21 @@ namespace interpreter.Parsing
             return context;
         }
 
-        private static void ProcessConstant(string[] parts, int lineNumber, ParserContext context)
+        private static void ProcessMacro(string[] parts, int lineNumber, ParserContext context)
         {
             if (parts.Length != 3)
-                throw new Exception($"Invalid const declaration at line {lineNumber}");
+                throw new Exception($"Invalid macro definition at line {lineNumber}");
 
-            if (Utils.Keywords.list.ContainsKey(parts[1]))
-                throw new Exception($"Const name is a reserved keyword at line {lineNumber}");
+            string name = parts[1];
+            string value = parts[2];
 
-            context.Constants[parts[1]] = parts[2];
+            if (int.TryParse(name, out _))
+                throw new Exception($"Macro name must be a identifier at line {lineNumber}");
+            
+            if (Utils.Keywords.list.ContainsKey(name))
+                throw new Exception($"Macro name is a reserved keyword at line {lineNumber}");
+
+            context.Macros[name] = value;
         }
 
         private static void ProcessLabel(string[] parts, int lineNumber, ParserContext context, int instructionIndex)

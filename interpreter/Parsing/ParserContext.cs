@@ -2,7 +2,7 @@ namespace interpreter.Parsing
 {
     public class ParserContext
     {
-        public Dictionary<string, string> Constants { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Macros { get; set; } = new Dictionary<string, string>();
         public Dictionary<string, int> Labels { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, int> Subroutines { get; set; } = new Dictionary<string, int>();
         public List<string> RawInstructionLines { get; set; } = new List<string>();
