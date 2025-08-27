@@ -1,44 +1,46 @@
+#define false 0
+#define true 1
 #define elem_a reg0
 #define elem_b reg1
 #define array_len reg3
 #define swap_occurred reg4
 
 // Fill ram with some numbers, this will be our "array" to sort
-mov 5 to ram
+ram = 5
 next address
-mov 3 to ram
+ram = 3
 next address
-mov 1 to ram
+ram = 1
 next address
-mov 10 to ram
+ram = 10
 next address
-mov 7 to ram
+ram = 7
 
-mov address to array_len
+array_len = address
 
 label lab_loop1
-mov 0 to address
-mov 0 to swap_occurred
+address = 0
+swap_occurred = 0
 
 label lab_loop2
-mov ram to elem_a
+elem_a = ram
 next address
-mov ram to elem_b
-if_grt reg0 reg1 sub_swap
-if_les address array_len lab_loop2
-if_eql swap_occurred 1 lab_loop1
+elem_b = ram
+if reg0 > reg1 sub_swap
+if address < array_len lab_loop2
+if swap_occurred == true lab_loop1
 
-mov 0 to address
+address = 0
 label lab_outputSorted
 print ram
 next address
-if_loe address array_len lab_outputSorted
+if address <= array_len lab_outputSorted
 halt
 
 subroutine sub_swap
 previous address
-mov elem_b to ram
+ram = elem_b
 next address
-mov elem_a to ram
-mov 1 to swap_occurred
+ram = elem_a
+swap_occurred = true
 return

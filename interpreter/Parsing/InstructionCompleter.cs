@@ -21,7 +21,7 @@ namespace interpreter.Parsing
                 pattern: ["CLEAR"],
                 expansion: ["CLEAR", "0", "0", "0"]
             ),
-            
+
             ["PREVIOUS"] = new InstructionTemplate(
                 pattern: ["PREVIOUS", "{VARIABLE}"],
                 expansion: ["PREVIOUS", "{VARIABLE}", "IN", "{VARIABLE}"]
@@ -50,6 +50,41 @@ namespace interpreter.Parsing
             ["GOTO"] = new InstructionTemplate(
                 pattern: ["GOTO", "{LABEL}"],
                 expansion: ["GOTO", "0", "0", "{LABEL}"]
+            ),
+
+            ["ASSIGNMENT"] = new InstructionTemplate(
+                pattern: ["{VARIABLE}", "=", "{VALUE}"],
+                expansion: ["MOV", "{VALUE}", "TO", "{VARIABLE}"]
+            ),
+
+            ["IF_EQL"] = new InstructionTemplate(
+                pattern: ["IF", "{A}", "==", "{B}", "{TARGET}"],
+                expansion: ["IF_EQL", "{A}", "{B}", "{TARGET}"]
+            ),
+
+            ["IF_GOE"] = new InstructionTemplate(
+                pattern: ["IF", "{A}", ">=", "{B}", "{TARGET}"],
+                expansion: ["IF_GOE", "{A}", "{B}", "{TARGET}"]
+            ),
+
+            ["IF_GRT"] = new InstructionTemplate(
+                pattern: ["IF", "{A}", ">", "{B}", "{TARGET}"],
+                expansion: ["IF_GRT", "{A}", "{B}", "{TARGET}"]
+            ),
+
+            ["IF_LES"] = new InstructionTemplate(
+                pattern: ["IF", "{A}", "<", "{B}", "{TARGET}"],
+                expansion: ["IF_LES", "{A}", "{B}", "{TARGET}"]
+            ),
+
+            ["IF_LOE"] = new InstructionTemplate(
+                pattern: ["IF", "{A}", "<=", "{B}", "{TARGET}"],
+                expansion: ["IF_LOE", "{A}", "{B}", "{TARGET}"]
+            ),
+            
+            ["IF_NEQ"] = new InstructionTemplate(
+                pattern: ["IF", "{A}", "!=", "{B}", "{TARGET}"],
+                expansion: ["IF_NEQ", "{A}", "{B}", "{TARGET}"]
             )
         };
 
