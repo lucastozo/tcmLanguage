@@ -54,6 +54,9 @@ namespace interpreter.Parsing
                         case '\"': // Quote \"
                             expansions.Add($"MOV {(byte)'\"'} TO OUTPUT");
                             break;
+                        case '/': // Forward slash \/
+                            expansions.Add($"MOV {(byte)'/'} TO OUTPUT");
+                            break;
                         default:
                             throw new Exception($"Invalid escape sequence \"{c}{nextChar}\" inside string at line {lineNumber}");
                     }
