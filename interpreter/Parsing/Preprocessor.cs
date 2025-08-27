@@ -36,6 +36,15 @@ namespace interpreter.Parsing
 
                 string[] parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
 
+                // Convert keywords to Upper
+                for (int w = 0; w < parts.Length; w++)
+                {
+                    if (Keywords.list.ContainsKey(parts[w].ToUpper()))
+                    {
+                        parts[w] = parts[w].ToUpper();
+                    }
+                }
+
                 if (PragmaProcessor.ProcessPragma(parts, i + 1, currentSettings))
                 {
                     continue;
@@ -98,7 +107,7 @@ namespace interpreter.Parsing
                 };
                 context.InstructionSettings.Add(settingsSnapshot);
                 
-                processedLine = string.Join(" ", parts).ToUpper();
+                processedLine = string.Join(" ", parts);
                 context.ProcesssedLines.Add(processedLine);
                 
                 context.OriginalLineNumbers.Add(i + 1);
