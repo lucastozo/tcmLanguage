@@ -13,6 +13,7 @@ namespace interpreter.Parsing
     
             var settings = new ParserSettings();
             string[] lines = File.ReadAllLines(pathToFile);
+            lines = lines.SelectMany(line => line.Split(';')).ToArray(); // split more lines with ';' to allow multiple in-line instructions
 
             if (Log.ShowLogs)
             {
