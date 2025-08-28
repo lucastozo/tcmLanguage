@@ -21,8 +21,9 @@ namespace interpreter.Parsing
             for (int i = 0; i < lines.Length; i++)
             {
                 string rawLine = lines[i];
-                int commentIdx = rawLine.IndexOf("//");
-                if (commentIdx >= 0) rawLine = rawLine[..commentIdx];
+                int commentIndex = rawLine.IndexOf("//");
+                if (commentIndex >= 0)
+                    rawLine = rawLine.Substring(0, commentIndex);
 
                 if (string.IsNullOrWhiteSpace(rawLine)) continue;
                 string processedLine = rawLine.Trim();
