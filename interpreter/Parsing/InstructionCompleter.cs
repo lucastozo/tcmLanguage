@@ -24,22 +24,22 @@ namespace interpreter.Parsing
 
             ["PREVIOUS"] = new InstructionTemplate(
                 pattern: ["PREVIOUS", "{VARIABLE}"],
-                expansion: ["PREVIOUS", "{VARIABLE}", "IN", "{VARIABLE}"]
+                expansion: ["SUB", "{VARIABLE}", "1", "{VARIABLE}"]
             ),
 
             ["NEXT"] = new InstructionTemplate(
                 pattern: ["NEXT", "{VARIABLE}"],
-                expansion: ["NEXT", "{VARIABLE}", "IN", "{VARIABLE}"]
+                expansion: ["ADD", "{VARIABLE}", "1", "{VARIABLE}"]
             ),
 
             ["RETURN"] = new InstructionTemplate(
                 pattern: ["RETURN"],
-                expansion: ["RETURN", "STACK", "TO", "COUNTER"]
+                expansion: ["MOV", "STACK", "TO", "COUNTER"]
             ),
 
             ["CALL"] = new InstructionTemplate(
                 pattern: ["CALL", "{SUBROUTINE}"],
-                expansion: ["CALL", "0", "255", "{SUBROUTINE}"]
+                expansion: [$"{Opcodes.IF_LES}", "0", "255", "{SUBROUTINE}"]
             ),
 
             ["PRINT"] = new InstructionTemplate(
@@ -49,7 +49,7 @@ namespace interpreter.Parsing
 
             ["GOTO"] = new InstructionTemplate(
                 pattern: ["GOTO", "{LABEL}"],
-                expansion: ["GOTO", "0", "0", "{LABEL}"]
+                expansion: [$"{Opcodes.IF_EQL}", "0", "0", "{LABEL}"]
             ),
 
             ["ASSIGNMENT"] = new InstructionTemplate(
@@ -59,32 +59,32 @@ namespace interpreter.Parsing
 
             ["IF_EQL"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", "==", "{B}", "{TARGET}"],
-                expansion: ["IF_EQL", "{A}", "{B}", "{TARGET}"]
+                expansion: [$"{Opcodes.IF_EQL}", "{A}", "{B}", "{TARGET}"]
             ),
 
             ["IF_GOE"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", ">=", "{B}", "{TARGET}"],
-                expansion: ["IF_GOE", "{A}", "{B}", "{TARGET}"]
+                expansion: [$"{Opcodes.IF_GOE}", "{A}", "{B}", "{TARGET}"]
             ),
 
             ["IF_GRT"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", ">", "{B}", "{TARGET}"],
-                expansion: ["IF_GRT", "{A}", "{B}", "{TARGET}"]
+                expansion: [$"{Opcodes.IF_GRT}", "{A}", "{B}", "{TARGET}"]
             ),
 
             ["IF_LES"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", "<", "{B}", "{TARGET}"],
-                expansion: ["IF_LES", "{A}", "{B}", "{TARGET}"]
+                expansion: [$"{Opcodes.IF_LES}", "{A}", "{B}", "{TARGET}"]
             ),
 
             ["IF_LOE"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", "<=", "{B}", "{TARGET}"],
-                expansion: ["IF_LOE", "{A}", "{B}", "{TARGET}"]
+                expansion: [$"{Opcodes.IF_LOE}", "{A}", "{B}", "{TARGET}"]
             ),
             
             ["IF_NEQ"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", "!=", "{B}", "{TARGET}"],
-                expansion: ["IF_NEQ", "{A}", "{B}", "{TARGET}"]
+                expansion: [$"{Opcodes.IF_NEQ}", "{A}", "{B}", "{TARGET}"]
             )
         };
 
