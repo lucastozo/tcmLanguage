@@ -1,13 +1,13 @@
 // Program to calculate nth fibonacci number
 
 #define N 10
-mov 1 to reg1
-mov N to reg4
+reg1 = 1
+reg4 = N
 
 label lab_loop
 next reg3
 add reg0 reg1 reg2
-mov reg1 to reg0
-mov reg2 to reg1
+reg0 = reg1
+reg1 = reg2
 print reg2
-if_les reg3 reg4 lab_loop
+if reg3 < reg4 lab_loop
