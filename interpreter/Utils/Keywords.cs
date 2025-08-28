@@ -23,6 +23,7 @@ namespace interpreter.Utils
             ["IF_NEQ"] = Opcodes.IF_NEQ,
             ["IN"] = 1,
             ["INPUT"] = 9,
+            ["INPUT_RAM"] = 11,
             ["MOD"] = Opcodes.MOD,
             ["MOV"] = 64,
             ["MULTIPLY"] = Opcodes.MULTIPLY,

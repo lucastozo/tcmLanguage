@@ -20,6 +20,7 @@ namespace interpreter.Parsing
                 "OUTPUT",
                 "STACK",
                 "RAM",
+                "INPUT_RAM",
                 "COUNTER"
             };
             foreach (var varName in otherVars)

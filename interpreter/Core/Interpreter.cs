@@ -1,5 +1,6 @@
 using interpreter.Utils;
 using interpreter.Parsing;
+using System.Text;
 
 namespace interpreter.Core
 {
@@ -42,24 +43,58 @@ namespace interpreter.Core
             if (variableCode == Keywords.list["OUTPUT"]) return vm.Output;
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
             if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
+            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.UserInputRAM[vm.Registers[REG_RAM_ADDRESS]];
             if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
 
             throw new InvalidStorageAreaException(variableCode);
         }
 
+        /// <summary>
+        /// Reads user input from the console and stores it in the VM's input memory.
+        /// </summary>
+        /// <returns>
+        /// 0 if input is a numeric value inside range 0-255; 1 if input is a string.
+        /// </returns>
+        /// <remarks>
+        /// <list type="bullet">
+        ///   <item><description>Before storing new input, the input RAM is cleared (all values set to 0).</description></item>
+        ///   <item><description>Bytes will always be stored at the start of INPUT_RAM array.</description></item>
+        ///   <item><description>If the input is a number, its byte value is written to INPUT_RAM[0].</description></item>
+        ///   <item><description>If the input is text, each character's ASCII code is stored sequentially in INPUT_RAM, ending with a null terminator (0).</description></item>
+        /// </list>
+        /// </remarks>
         private byte GetUserInput()
         {
+            Console.InputEncoding = Encoding.UTF8;
+
             Log.PrintMessage("[INTERPRETER] INPUT requested");
             string? input = Console.ReadLine();
             Log.PrintMessage($"[INTERPRETER] User input received: {input}");
 
-            if (!string.IsNullOrWhiteSpace(input) && byte.TryParse(input.Trim(), out byte value))
+            if (string.IsNullOrWhiteSpace(input))
+                throw InvalidInputException.Generic();
+
+            Array.Clear(vm.UserInputRAM);
+            
+            if (int.TryParse(input.Trim(), out int value) && value >= byte.MinValue && value <= byte.MaxValue)
             {
-                Log.PrintMessage($"[INTERPRETER] User input parsed successfully: {value}");
-                return value;
+                vm.UserInputRAM[0] = (byte)value;
+                Log.PrintMessage($"[INTERPRETER] User input parsed to: {value}");
+                return 0;
             }
 
-            throw new InvalidInputException(input);
+            // Its minus 1 because we need to leave space for the null terminator
+            if (input.Length >= VirtualMachine.MAX_RAM - 1)
+                throw InvalidInputException.LengthExceeded(input, VirtualMachine.MAX_RAM - 1);
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] > byte.MaxValue)
+                    throw InvalidInputException.OutOfRangeChar(input);
+                vm.UserInputRAM[i] = (byte)input[i];
+                Log.PrintMessage($"[INTERPRETER] User input RAM[{i}] set to: {vm.UserInputRAM[i]}");
+            }
+            return 1;
         }
     
         private string SetVariable(byte variableCode, byte value)
