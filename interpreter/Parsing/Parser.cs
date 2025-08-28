@@ -68,15 +68,6 @@ namespace interpreter.Parsing
         {
             List<byte> bParts = new();
 
-            // Replace constants in instruction
-            for (int i = 0; i < parts.Length; i++)
-            {
-                if (context.Macros.TryGetValue(parts[i], out string? value))
-                {
-                    parts[i] = value;
-                }
-            }
-
             byte baseOpcode = ExpressionEvaluator.EvaluateExpression(parts[0], context, lineNumber, instructionSettings.Overflow);
             byte finalOpcode = OpcodeManager.BuildOpcode(baseOpcode, parts[1], parts[2], context, lineNumber);
             bParts.Add(finalOpcode);

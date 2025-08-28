@@ -28,14 +28,25 @@ namespace interpreter.Parsing
                 if (string.IsNullOrWhiteSpace(rawLine)) continue;
                 string processedLine = rawLine.Trim();
 
+                // Replace constants in instruction
+                string[] parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
+                for (int j = 0; j < parts.Length; j++)
+                {
+                    if (context.Macros.TryGetValue(parts[j], out string? value))
+                    {
+                        parts[j] = value;
+                    }
+                }
+                processedLine = string.Join(' ', parts);
+
                 string completedLine = InstructionCompleter.CompleteInstruction(processedLine, i + 1);
                 if (completedLine != processedLine)
                 {
                     Log.PrintMessage($"Line completed: '{processedLine}' -> '{completedLine}'");
                     processedLine = completedLine;
                 }
-
-                string[] parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
+                
+                parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
 
                 // Convert keywords to Upper
                 for (int w = 0; w < parts.Length; w++)
