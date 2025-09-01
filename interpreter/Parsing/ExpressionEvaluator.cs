@@ -32,6 +32,14 @@ namespace interpreter.Parsing
                         return (byte)v;
                     }
                 }
+
+                if (context.Macros.TryGetValue(expression, out string? macro))
+                {
+                    if (int.TryParse(macro, out int value))
+                    {
+                        return (byte)value;
+                    }
+                }
     
                 if (context.Labels.TryGetValue(expression, out int labelAddr))
                 {
@@ -119,8 +127,7 @@ namespace interpreter.Parsing
         private static int ParseBinaryOperation(string expression, char op, ParserContext context,
                                               Func<int, int, int> operation, bool allowOverflow = false)
         {
-            // Find the rightmost occurrence of the operator to handle left-to-right evaluation
-            int opIndex = expression.LastIndexOf(op);
+            int opIndex = expression.IndexOf(op);
             if (opIndex == -1) return ParseExpression(expression, context, allowOverflow);
     
             string left = expression.Substring(0, opIndex).Trim();
