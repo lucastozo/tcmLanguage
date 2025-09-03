@@ -11,7 +11,7 @@ namespace interpreter.Parsing
             {
                 if (ContainsOperators(expression))
                 {
-                    return (byte)ParseExpression(expression, context, allowOverflow);
+                    return (byte)ParseExpression(expression, context, allowOverflow, lineNumber);
                 }
     
                 if (expression.All(char.IsDigit))
@@ -71,7 +71,7 @@ namespace interpreter.Parsing
                    expression.Contains('^') || expression.Contains('&');
         }
     
-        private static int ParseExpression(string expression, ParserContext context, bool allowOverflow = false)
+        private static int ParseExpression(string expression, ParserContext context, bool allowOverflow = false, int lineNumber = 0)
         {
             // Handle operators
             // 1. Multiplication (*), Division (/), Modulo (%)
@@ -80,29 +80,29 @@ namespace interpreter.Parsing
     
             if (expression.Contains('|'))
             {
-                return ParseBinaryOperation(expression, '|', context, (a, b) => a | b, allowOverflow);
+                return ParseBinaryOperation(expression, '|', context, (a, b) => a | b, allowOverflow, lineNumber);
             }
             if (expression.Contains('^'))
             {
-                return ParseBinaryOperation(expression, '^', context, (a, b) => a ^ b, allowOverflow);
+                return ParseBinaryOperation(expression, '^', context, (a, b) => a ^ b, allowOverflow, lineNumber);
             }
             if (expression.Contains('&'))
             {
-                return ParseBinaryOperation(expression, '&', context, (a, b) => a & b, allowOverflow);
+                return ParseBinaryOperation(expression, '&', context, (a, b) => a & b, allowOverflow, lineNumber);
             }
     
             if (expression.Contains('+'))
             {
-                return ParseBinaryOperation(expression, '+', context, (a, b) => a + b, allowOverflow);
+                return ParseBinaryOperation(expression, '+', context, (a, b) => a + b, allowOverflow, lineNumber);
             }
             if (expression.Contains('-'))
             {
-                return ParseBinaryOperation(expression, '-', context, (a, b) => a - b, allowOverflow);
+                return ParseBinaryOperation(expression, '-', context, (a, b) => a - b, allowOverflow, lineNumber);
             }
     
             if (expression.Contains('*'))
             {
-                return ParseBinaryOperation(expression, '*', context, (a, b) => a * b, allowOverflow);
+                return ParseBinaryOperation(expression, '*', context, (a, b) => a * b, allowOverflow, lineNumber);
             }
             if (expression.Contains('/'))
             {
@@ -110,7 +110,7 @@ namespace interpreter.Parsing
                 {
                     if (b == 0) throw new Exception("Division by zero");
                     return a / b;
-                }, allowOverflow);
+                }, allowOverflow, lineNumber);
             }
             if (expression.Contains('%'))
             {
@@ -118,24 +118,23 @@ namespace interpreter.Parsing
                 {
                     if (b == 0) throw new Exception("Modulo by zero");
                     return a % b;
-                }, allowOverflow);
+                }, allowOverflow, lineNumber);
             }
     
             throw new Exception($"Invalid expression '{expression}'");
         }
     
         private static int ParseBinaryOperation(string expression, char op, ParserContext context,
-                                              Func<int, int, int> operation, bool allowOverflow = false)
+                                              Func<int, int, int> operation, bool allowOverflow = false, int lineNumber = 0)
         {
             int opIndex = expression.IndexOf(op);
-            if (opIndex == -1) return ParseExpression(expression, context, allowOverflow);
+            if (opIndex == -1) return ParseExpression(expression, context, allowOverflow, lineNumber);
     
             string left = expression.Substring(0, opIndex).Trim();
             string right = expression.Substring(opIndex + 1).Trim();
-    
-            int leftVal = EvaluateExpression(left, context, 0, allowOverflow);
-            int rightVal = EvaluateExpression(right, context, 0, allowOverflow);
-    
+
+            int leftVal = EvaluateExpression(left, context, lineNumber, allowOverflow);
+            int rightVal = EvaluateExpression(right, context, lineNumber, allowOverflow);
             int result = operation(leftVal, rightVal);
     
             if (allowOverflow)
