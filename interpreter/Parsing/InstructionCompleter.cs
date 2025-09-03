@@ -51,12 +51,7 @@ namespace interpreter.Parsing
                 pattern: ["GOTO", "{LABEL}"],
                 expansion: [$"{Opcodes.IF_EQL}", "0", "0", "{LABEL}"]
             ),
-
-            ["ASSIGNMENT"] = new InstructionTemplate(
-                pattern: ["{VARIABLE}", "=", "{VALUE}"],
-                expansion: ["MOV", "{VALUE}", "TO", "{VARIABLE}"]
-            ),
-
+            
             ["IF_EQL"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", "==", "{B}", "{TARGET}"],
                 expansion: [$"{Opcodes.IF_EQL}", "{A}", "{B}", "{TARGET}"]
