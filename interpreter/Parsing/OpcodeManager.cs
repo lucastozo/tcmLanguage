@@ -5,10 +5,10 @@ namespace interpreter.Parsing
 {
     public static class OpcodeManager
     {
-        private static readonly HashSet<byte> VariableKeywords = InitializeVariableKeywords();
-        private static HashSet<byte> InitializeVariableKeywords()
+        private static readonly HashSet<int> VariableKeywords = InitializeVariableKeywords();
+        private static HashSet<int> InitializeVariableKeywords()
         {
-            var keywords = new HashSet<byte>();
+            var keywords = new HashSet<int>();
             
             for (int i = 0; i < VirtualMachine.MAX_REGISTERS; i++)
             {
@@ -34,9 +34,9 @@ namespace interpreter.Parsing
         private const byte ARG1_LITERAL_MASK = 1 << 7;
         private const byte ARG2_LITERAL_MASK = 1 << 6;
 
-        public static byte BuildOpcode(byte baseOpcode, string arg1, string arg2, ParserContext context, int lineNumber)
+        public static int BuildOpcode(int baseOpcode, string arg1, string arg2, ParserContext context, int lineNumber)
         {
-            byte finalOpcode = baseOpcode;
+            int finalOpcode = baseOpcode;
 
             if (IsLiteralValue(arg1, context)) finalOpcode |= ARG1_LITERAL_MASK;
 
@@ -52,7 +52,8 @@ namespace interpreter.Parsing
 
         private static bool IsLiteralValue(string value, ParserContext context)
         {
-            if (value.All(char.IsDigit) && !string.IsNullOrEmpty(value))
+            if (float.TryParse(value, System.Globalization.NumberStyles.Float, 
+                   System.Globalization.CultureInfo.InvariantCulture, out _) && !string.IsNullOrEmpty(value))
                 return true;
 
             if (context.Labels.ContainsKey(value))

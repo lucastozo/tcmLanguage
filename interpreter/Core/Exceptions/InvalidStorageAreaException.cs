@@ -4,7 +4,7 @@ namespace interpreter.Core
     {
         internal InvalidStorageAreaException() : base("Attempted to access invalid storage area") { }
         
-        internal InvalidStorageAreaException(byte areaCode) 
+        internal InvalidStorageAreaException(float areaCode) 
             : base($"Attempted to access invalid storage area: '{areaCode}'") { }
     }
 }

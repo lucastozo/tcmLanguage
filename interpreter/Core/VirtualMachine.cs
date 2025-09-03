@@ -7,13 +7,13 @@ namespace interpreter.Core
         public const int MAX_RAM = 256;
         public const int MAX_REGISTERS = 6; // REG0 - REG5 
     
-        public byte[] RAM { get; } = new byte[MAX_RAM];
-        public byte[] Registers { get; } = new byte[MAX_REGISTERS];
-        public byte[] UserInputRAM { get; } = new byte[MAX_RAM];
+        public float[] RAM { get; } = new float[MAX_RAM];
+        public float[] Registers { get; } = new float[MAX_REGISTERS];
+        public float[] UserInputRAM { get; } = new float[MAX_RAM];
 
         public int IP { get; set; } = 0;
-        public Stack<byte> CallStack { get; } = new Stack<byte>();
-        public byte Output { get; set; } = 0;
+        public Stack<float> CallStack { get; } = new Stack<float>();
+        public float Output { get; set; } = 0;
     
         public void PrintState()
         {
@@ -28,7 +28,7 @@ namespace interpreter.Core
                 for (int col = 0; col < MAX_RAM / 8; col++)
                 {
                     int index = row * MAX_RAM / 8 + col;
-                    ramState += $"{RAM[index]:X2} "; // Hex format, 2-digit
+                    ramState += $"{RAM[index]:F2} "; // Float format with 2 decimal places
                 }
                 ramState += "\n";
             }

@@ -8,7 +8,7 @@ namespace interpreter.Core
     {
         private VirtualMachine vm;
         private List<ParserSettings> instructionSettings;
-        public const byte REG_RAM_ADDRESS = 5; // REG5 controls the address of RAM
+        public const int REG_RAM_ADDRESS = 5; // REG5 controls the address of RAM
 
         public Interpreter(VirtualMachine vm, List<ParserSettings> settings)
         {
@@ -25,26 +25,26 @@ namespace interpreter.Core
             BothArgs = 3 // Both ARG1 and ARG2 are literals
         }
     
-        private ArgumentMode GetArgumentMode(byte opcode)
+        private ArgumentMode GetArgumentMode(int opcode)
         {
-            const byte MASK_ARG1 = 1 << 7;
-            const byte MASK_ARG2 = 1 << 6;
-            const byte MASK_BOTH = MASK_ARG1 | MASK_ARG2;
+            const int MASK_ARG1 = 1 << 7;
+            const int MASK_ARG2 = 1 << 6;
+            const int MASK_BOTH = MASK_ARG1 | MASK_ARG2;
             if ((opcode & MASK_BOTH) == MASK_BOTH) return ArgumentMode.BothArgs;
             if ((opcode & MASK_ARG1) == MASK_ARG1) return ArgumentMode.Arg1Only;
             if ((opcode & MASK_ARG2) == MASK_ARG2) return ArgumentMode.Arg2Only;
             return ArgumentMode.None;
         }
     
-        private byte GetVariable(byte variableCode)
+        private float GetVariable(float variableCode)
         {
-            if (variableCode < VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
+            if (variableCode < VirtualMachine.MAX_REGISTERS) return vm.Registers[(int)variableCode];
             if (variableCode == Keywords.list["INPUT"]) return GetUserInput();
             if (variableCode == Keywords.list["OUTPUT"]) return vm.Output;
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
-            if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
-            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.UserInputRAM[vm.Registers[REG_RAM_ADDRESS]];
-            if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
+            if (variableCode == Keywords.list["RAM"]) return vm.RAM[(int)vm.Registers[REG_RAM_ADDRESS]];
+            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.UserInputRAM[(int)vm.Registers[REG_RAM_ADDRESS]];
+            if (variableCode == Keywords.list["COUNTER"]) return vm.IP;
 
             throw new InvalidStorageAreaException(variableCode);
         }
@@ -63,7 +63,7 @@ namespace interpreter.Core
         ///   <item><description>If the input is text, each character's ASCII code is stored sequentially in INPUT_RAM, ending with a null terminator (0).</description></item>
         /// </list>
         /// </remarks>
-        private byte GetUserInput()
+        private float GetUserInput()
         {
             Console.InputEncoding = Encoding.UTF8;
 
@@ -76,9 +76,9 @@ namespace interpreter.Core
 
             Array.Clear(vm.UserInputRAM);
             
-            if (int.TryParse(input.Trim(), out int value) && value >= byte.MinValue && value <= byte.MaxValue)
+            if (float.TryParse(input.Trim(), out float value))
             {
-                vm.UserInputRAM[0] = (byte)value;
+                vm.UserInputRAM[0] = value;
                 Log.PrintMessage($"[INTERPRETER] User input parsed to: {value}");
                 return 0;
             }
@@ -89,17 +89,15 @@ namespace interpreter.Core
 
             for (int i = 0; i < input.Length; i++)
             {
-                if (input[i] > byte.MaxValue)
-                    throw InvalidInputException.OutOfRangeChar(input);
-                vm.UserInputRAM[i] = (byte)input[i];
+                vm.UserInputRAM[i] = input[i];
                 Log.PrintMessage($"[INTERPRETER] User input RAM[{i}] set to: {vm.UserInputRAM[i]}");
             }
             return 1;
         }
     
-        private string SetVariable(byte variableCode, byte value)
+        private string SetVariable(int variableCode, float value)
         {
-            // Use when "variables" are mentioned in destination (last byte)
+            // Use when "variables" are mentioned in destination
     
             if (variableCode < VirtualMachine.MAX_REGISTERS)
             {
@@ -118,24 +116,24 @@ namespace interpreter.Core
             }
             if (variableCode == Keywords.list["RAM"])
             {
-                vm.RAM[vm.Registers[REG_RAM_ADDRESS]] = value;
+                vm.RAM[(int)vm.Registers[REG_RAM_ADDRESS]] = value;
                 return "RAM";
             }
             if (variableCode == Keywords.list["COUNTER"])
             {
-                vm.IP = value;
+                vm.IP = (int)value;
                 return "COUNTER";
             }
 
             throw new InvalidStorageAreaException(variableCode);
         }
     
-        private bool OpcodeIsConditional(byte opcode)
+        private bool OpcodeIsConditional(int opcode)
         {
             return opcode >= Opcodes.IF_EQL && opcode <= Opcodes.IF_GOE;
         }
     
-        private bool IsSubroutineAddress(byte address)
+        private bool IsSubroutineAddress(int address)
         {
             return Parser.SubroutineAddresses.Contains(address);
         }
@@ -212,26 +210,26 @@ namespace interpreter.Core
             ResolveArguments(workingInstr);
             Log.PrintMessage($"Arguments of instruction changed to: {workingInstr.Arg1} {workingInstr.Arg2}");
     
-            byte baseOpcode = (byte)(workingInstr.Opcode & 0b00111111); // removes the 2 most significant bits
+            int baseOpcode = workingInstr.Opcode & 0b00111111; // removes the 2 most significant bits
             Log.PrintMessage($"Opcode decoded to: {baseOpcode}");
     
             // Execute OPCODE
-            int _result = baseOpcode switch
+            float result = baseOpcode switch
             {
                 Opcodes.ADD => workingInstr.Arg1 + workingInstr.Arg2,
                 Opcodes.SUB => workingInstr.Arg1 - workingInstr.Arg2,
-                Opcodes.AND => workingInstr.Arg1 & workingInstr.Arg2,
-                Opcodes.OR => workingInstr.Arg1 | workingInstr.Arg2,
-                Opcodes.NOT_A => ~workingInstr.Arg1,
-                Opcodes.XOR => workingInstr.Arg1 ^ workingInstr.Arg2,
+                Opcodes.AND => (int)workingInstr.Arg1 & (int)workingInstr.Arg2,
+                Opcodes.OR => (int)workingInstr.Arg1 | (int)workingInstr.Arg2,
+                Opcodes.NOT_A => ~(int)workingInstr.Arg1,
+                Opcodes.XOR => (int)workingInstr.Arg1 ^ (int)workingInstr.Arg2,
                 Opcodes.MULTIPLY => workingInstr.Arg1 * workingInstr.Arg2,
                 Opcodes.DIV => workingInstr.Arg1 / workingInstr.Arg2,
                 Opcodes.MOD => workingInstr.Arg1 % workingInstr.Arg2,
-                Opcodes.SHL => workingInstr.Arg1 << workingInstr.Arg2,
-                Opcodes.SHR => workingInstr.Arg1 >> workingInstr.Arg2,
-                Opcodes.ASHR => ((sbyte)workingInstr.Arg1) >> workingInstr.Arg2,
-                Opcodes.ROL => (workingInstr.Arg1 << workingInstr.Arg2) | (workingInstr.Arg1 >> (8 - workingInstr.Arg2)),
-                Opcodes.ROR => (workingInstr.Arg1 >> workingInstr.Arg2) | (workingInstr.Arg1 << (8 - workingInstr.Arg2)),
+                Opcodes.SHL => (int)workingInstr.Arg1 << (int)workingInstr.Arg2,
+                Opcodes.SHR => (int)workingInstr.Arg1 >> (int)workingInstr.Arg2,
+                //Opcodes.ASHR => ((sbyte)workingInstr.Arg1) >> workingInstr.Arg2,
+                Opcodes.ROL => ((int)workingInstr.Arg1 << (int)workingInstr.Arg2) | ((int)workingInstr.Arg1 >> (8 - (int)workingInstr.Arg2)),
+                Opcodes.ROR => ((int)workingInstr.Arg1 >> (int)workingInstr.Arg2) | ((int)workingInstr.Arg1 << (8 - (int)workingInstr.Arg2)),
                 Opcodes.IF_EQL => workingInstr.Arg1 == workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_NEQ => workingInstr.Arg1 != workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_LES => workingInstr.Arg1 < workingInstr.Arg2 ? 1 : 0,
@@ -240,23 +238,6 @@ namespace interpreter.Core
                 Opcodes.IF_GOE => workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0,
                 _ => throw new NotImplementedException($"Opcode {baseOpcode} not implemented")
             };
-
-            bool allowOverflow = false;
-            if (instructionSettings != null && vm.IP < instructionSettings.Count)
-            {
-                allowOverflow = instructionSettings[vm.IP].Overflow;
-            }
-            
-            if (!allowOverflow && _result < byte.MinValue)
-            {
-                throw new ArithmeticUnderflowException(instr, _result);
-            }
-            else if (!allowOverflow && _result > byte.MaxValue)
-            {
-                throw new ArithmeticOverflowException(instr, _result);
-            }
-
-            byte result = (byte)_result;
     
             Log.PrintMessage($"Result of ALU: {result}");
     
@@ -268,7 +249,7 @@ namespace interpreter.Core
                 if (IsSubroutineAddress(workingInstr.Destination))
                 {
                     Log.PrintMessage("Subroutine detected");
-                    vm.CallStack.Push((byte)(vm.IP + 1));
+                    vm.CallStack.Push(vm.IP + 1);
                     Log.PrintMessage($"Return address {vm.IP} pushed to stack");
                 }
     
@@ -294,10 +275,6 @@ namespace interpreter.Core
                 {
                     Console.Write((char)vm.Output);
                 }
-                else if (signedMode)
-                {
-                    Console.WriteLine((sbyte)vm.Output);
-                }
                 else
                 {
                     Console.WriteLine(vm.Output);
@@ -314,7 +291,7 @@ namespace interpreter.Core
                 case Opcodes.HALT:
                     throw new ProgramHaltException();
                 case Opcodes.WAIT:
-                    Thread.Sleep(instr.Arg1);
+                    Thread.Sleep((int)instr.Arg1);
                     break;
                 case Opcodes.CLEAR:
                     Console.Clear();

@@ -34,28 +34,28 @@ namespace interpreter.Parsing
                     switch (nextChar)
                     {
                         case 'n': // Newline \n
-                            expansions.Add($"MOV {(byte)'\n'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'\n'} TO OUTPUT");
                             break;
                         case 'b': // Backspace \b
-                            expansions.Add($"MOV {(byte)'\b'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'\b'} TO OUTPUT");
                             break;
                         case 't': // hTab \t
-                            expansions.Add($"MOV {(byte)'\t'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'\t'} TO OUTPUT");
                             break;
                         case 'v': // vTab \v
-                            expansions.Add($"MOV {(byte)'\v'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'\v'} TO OUTPUT");
                             break;
                         case 'r': // Carriage return \r
-                            expansions.Add($"MOV {(byte)'\r'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'\r'} TO OUTPUT");
                             break;
                         case '\\': // Backslash \\
-                            expansions.Add($"MOV {(byte)'\\'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'\\'} TO OUTPUT");
                             break;
                         case '\"': // Quote \"
-                            expansions.Add($"MOV {(byte)'\"'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'\"'} TO OUTPUT");
                             break;
                         case '/': // Forward slash \/
-                            expansions.Add($"MOV {(byte)'/'} TO OUTPUT");
+                            expansions.Add($"MOV {(int)'/'} TO OUTPUT");
                             break;
                         default:
                             throw new Exception($"Invalid escape sequence \"{c}{nextChar}\" inside string at line {lineNumber}");
@@ -63,7 +63,7 @@ namespace interpreter.Parsing
                 }
                 else
                 {
-                    expansions.Add($"MOV {(byte)c} TO OUTPUT"); // normal char
+                    expansions.Add($"MOV {(int)c} TO OUTPUT"); // normal char
                 }
             }
             

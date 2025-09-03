@@ -56,25 +56,25 @@ namespace interpreter.Parsing
                     throw new Exception($"Invalid instruction at line {originalLineNum}");
                 }
 
-                List<byte> bParts = ProcessInstructionParts(parts, context, originalLineNum, instructionSettings);
+                List<float> bParts = ProcessInstructionParts(parts, context, originalLineNum, instructionSettings);
 
-                instructions.Add(new Instruction(bParts[0], bParts[1], bParts[2], bParts[3]));
+                instructions.Add(new Instruction((int)bParts[0], bParts[1], bParts[2], (int)bParts[3]));
             }
 
             return instructions;
         }
 
-        private static List<byte> ProcessInstructionParts(string[] parts, ParserContext context, int lineNumber, ParserSettings instructionSettings)
+        private static List<float> ProcessInstructionParts(string[] parts, ParserContext context, int lineNumber, ParserSettings instructionSettings)
         {
-            List<byte> bParts = new();
+            List<float> bParts = new();
 
-            byte baseOpcode = ExpressionEvaluator.EvaluateExpression(parts[0], context, lineNumber, instructionSettings.Overflow);
-            byte finalOpcode = OpcodeManager.BuildOpcode(baseOpcode, parts[1], parts[2], context, lineNumber);
+            float baseOpcode = ExpressionEvaluator.EvaluateExpression(parts[0], context, lineNumber, instructionSettings.Overflow);
+            float finalOpcode = OpcodeManager.BuildOpcode((int)baseOpcode, parts[1], parts[2], context, lineNumber);
             bParts.Add(finalOpcode);
             
             for (int i = 1; i < parts.Length; i++)
             {
-                byte value = ExpressionEvaluator.EvaluateExpression(parts[i], context, lineNumber, instructionSettings.Overflow);
+                float value = ExpressionEvaluator.EvaluateExpression(parts[i], context, lineNumber, instructionSettings.Overflow);
                 bParts.Add(value);
             }
 

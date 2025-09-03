@@ -4,51 +4,38 @@ namespace interpreter.Parsing
 {
     public static class ExpressionEvaluator
     {
-        public static byte EvaluateExpression(string expression, ParserContext context, 
+        public static float EvaluateExpression(string expression, ParserContext context, 
                                             int lineNumber, bool allowOverflow = false)
         {
             try
             {
                 if (ContainsOperators(expression))
                 {
-                    return (byte)ParseExpression(expression, context, allowOverflow, lineNumber);
+                    return ParseExpression(expression, context, allowOverflow, lineNumber);
                 }
     
-                if (expression.All(char.IsDigit))
+                if (float.TryParse(expression, System.Globalization.NumberStyles.Float, 
+                           System.Globalization.CultureInfo.InvariantCulture, out float numValue))
                 {
-                    int v = int.Parse(expression);
-                    
-                    if (allowOverflow)
-                    {
-                        if (v < 0)
-                        {
-                            while (v < 0) v += byte.MaxValue+1;
-                        }
-                        return (byte)(v % (byte.MaxValue+1));
-                    }
-                    else
-                    {
-                        if (v < byte.MinValue || v > byte.MaxValue) throw new Exception($"Value {v} out of range ({byte.MinValue}-{byte.MaxValue}) at line {lineNumber}");
-                        return (byte)v;
-                    }
+                    return numValue;
                 }
 
                 if (context.Macros.TryGetValue(expression, out string? macro))
                 {
-                    if (int.TryParse(macro, out int value))
+                    if (float.TryParse(macro, out float value))
                     {
-                        return (byte)value;
+                        return value;
                     }
                 }
     
                 if (context.Labels.TryGetValue(expression, out int labelAddr))
                 {
-                    return (byte)labelAddr;
+                    return labelAddr;
                 }
     
                 if (context.Subroutines.TryGetValue(expression, out int subroutineAddr))
                 {
-                    return (byte)subroutineAddr;
+                    return subroutineAddr;
                 }
     
                 if (Keywords.list.TryGetValue(expression, out byte kwVal))
@@ -66,12 +53,22 @@ namespace interpreter.Parsing
     
         private static bool ContainsOperators(string expression)
         {
+            // Special case for negative numbers
+            if (expression.StartsWith("-") && expression.Length > 1 && 
+                !expression.Substring(1).Contains('+') && !expression.Substring(1).Contains('-') && 
+                !expression.Substring(1).Contains('*') && !expression.Substring(1).Contains('/') && 
+                !expression.Substring(1).Contains('%') && !expression.Substring(1).Contains('|') && 
+                !expression.Substring(1).Contains('^') && !expression.Substring(1).Contains('&'))
+            {
+                return false;
+            }
+            
             return expression.Contains('|') || expression.Contains('+') || expression.Contains('-') ||
                    expression.Contains('*') || expression.Contains('/') || expression.Contains('%') ||
                    expression.Contains('^') || expression.Contains('&');
         }
     
-        private static int ParseExpression(string expression, ParserContext context, bool allowOverflow = false, int lineNumber = 0)
+        private static float ParseExpression(string expression, ParserContext context, bool allowOverflow = false, int lineNumber = 0)
         {
             // Handle operators
             // 1. Multiplication (*), Division (/), Modulo (%)
@@ -80,15 +77,15 @@ namespace interpreter.Parsing
     
             if (expression.Contains('|'))
             {
-                return ParseBinaryOperation(expression, '|', context, (a, b) => a | b, allowOverflow, lineNumber);
+                return ParseBinaryOperation(expression, '|', context, (a, b) => (int)a | (int)b, allowOverflow, lineNumber);
             }
             if (expression.Contains('^'))
             {
-                return ParseBinaryOperation(expression, '^', context, (a, b) => a ^ b, allowOverflow, lineNumber);
+                return ParseBinaryOperation(expression, '^', context, (a, b) => (int)a ^ (int)b, allowOverflow, lineNumber);
             }
             if (expression.Contains('&'))
             {
-                return ParseBinaryOperation(expression, '&', context, (a, b) => a & b, allowOverflow, lineNumber);
+                return ParseBinaryOperation(expression, '&', context, (a, b) => (int)a & (int)b, allowOverflow, lineNumber);
             }
     
             if (expression.Contains('+'))
@@ -124,8 +121,8 @@ namespace interpreter.Parsing
             throw new Exception($"Invalid expression '{expression}'");
         }
     
-        private static int ParseBinaryOperation(string expression, char op, ParserContext context,
-                                              Func<int, int, int> operation, bool allowOverflow = false, int lineNumber = 0)
+        private static float ParseBinaryOperation(string expression, char op, ParserContext context,
+                                              Func<float, float, float> operation, bool allowOverflow = false, int lineNumber = 0)
         {
             int opIndex = expression.IndexOf(op);
             if (opIndex == -1) return ParseExpression(expression, context, allowOverflow, lineNumber);
@@ -133,26 +130,11 @@ namespace interpreter.Parsing
             string left = expression.Substring(0, opIndex).Trim();
             string right = expression.Substring(opIndex + 1).Trim();
 
-            int leftVal = EvaluateExpression(left, context, lineNumber, allowOverflow);
-            int rightVal = EvaluateExpression(right, context, lineNumber, allowOverflow);
-            int result = operation(leftVal, rightVal);
-    
-            if (allowOverflow)
-            {
-                if (result < 0)
-                {
-                    while (result < 0) result += 256;
-                }
-                return result % 256;
-            }
-            else
-            {
-                if (result < byte.MinValue || result > byte.MaxValue)
-                {
-                    throw new Exception($"Expression result {result} out of range ({byte.MinValue}-{byte.MaxValue})");
-                }
-                return result;
-            }
+            float leftVal = EvaluateExpression(left, context, lineNumber, allowOverflow);
+            float rightVal = EvaluateExpression(right, context, lineNumber, allowOverflow);
+            float result = operation(leftVal, rightVal);
+
+            return result;
         }
     }
 }

@@ -2,12 +2,12 @@ namespace interpreter.Core
 {
     class Instruction
     {
-        public byte Opcode { get; } = 0;
-        public byte Arg1 { get; set; } = 0;
-        public byte Arg2 { get; set; } = 0;
-        public byte Destination { get; } = 0;
+        public int Opcode { get; } = 0;
+        public float Arg1 { get; set; } = 0;
+        public float Arg2 { get; set; } = 0;
+        public int Destination { get; } = 0;
     
-        public Instruction(byte opcode, byte arg1, byte arg2, byte destination)
+        public Instruction(int opcode, float arg1, float arg2, int destination)
         {
             Opcode = opcode;
             Arg1 = arg1;
