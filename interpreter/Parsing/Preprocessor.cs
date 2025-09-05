@@ -142,7 +142,7 @@ namespace interpreter.Parsing
                 throw new Exception($"Macro name must be a identifier at line {lineNumber}");
 
             if (Utils.Keywords.list.ContainsKey(name))
-                throw new Exception($"Macro name is a reserved keyword at line {lineNumber}");
+                throw new Exception($"Macro identifier can not be a reserved keyword at line {lineNumber}");
 
             context.Macros[name] = value;
         }
@@ -152,6 +152,12 @@ namespace interpreter.Parsing
             if (parts.Length != 2)
                 throw new Exception($"Invalid label at line {lineNumber}");
 
+            if (int.TryParse(parts[1], out _))
+                throw new Exception($"Label name must be a identifier at line {lineNumber}");
+
+            if (Utils.Keywords.list.ContainsKey(parts[1]))
+                throw new Exception($"Label identifier can not be a reserved keyword at line {lineNumber}");
+
             context.Labels.Add(parts[1], instructionIndex);
         }
 
@@ -160,10 +166,15 @@ namespace interpreter.Parsing
             if (parts.Length != 2)
                 throw new Exception($"Invalid subroutine declaration at line {lineNumber}");
 
+            if (int.TryParse(parts[1], out _))
+                throw new Exception($"Subroutine name must be a identifier at line {lineNumber}");
+
+            if (Utils.Keywords.list.ContainsKey(parts[1]))
+                throw new Exception($"Subroutine identifier can not be a reserved keyword at line {lineNumber}");
+
             int address = instructionIndex;
             context.Subroutines.Add(parts[1], address);
             context.SubroutineAddresses.Add(address); // for interpreter access
-            Log.PrintMessage($"[PARSER] Subroutine '{parts[1]}' registered at address {address}");
         }
 
         internal static string[] SplitterWithException(string str, char splitChar, char exceptionChar)
