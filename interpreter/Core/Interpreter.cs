@@ -16,7 +16,7 @@ namespace interpreter.Core
             this.instructionSettings = new List<ParserSettings>();
             this.instructionSettings = settings;
         }
-    
+
         private enum ArgumentMode
         {
             None = 0, // No arguments are literals
@@ -24,7 +24,7 @@ namespace interpreter.Core
             Arg2Only = 2, // ARG2 is literal (ARG1 is variable)
             BothArgs = 3 // Both ARG1 and ARG2 are literals
         }
-    
+        
         private ArgumentMode GetArgumentMode(byte opcode)
         {
             const byte MASK_ARG1 = 1 << 7;
@@ -35,7 +35,7 @@ namespace interpreter.Core
             if ((opcode & MASK_ARG2) == MASK_ARG2) return ArgumentMode.Arg2Only;
             return ArgumentMode.None;
         }
-    
+        
         private byte GetVariable(byte variableCode)
         {
             if (variableCode < VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
@@ -50,17 +50,15 @@ namespace interpreter.Core
         }
 
         /// <summary>
-        /// Reads user input from the console and stores it in the VM's input memory.
+        /// Reads user input from the console.
         /// </summary>
         /// <returns>
-        /// 0 if input is a numeric value inside range 0-255; 1 if input is a string.
+        /// input if input is a numeric value inside range 0-255. Or input.Length if input is a string.
         /// </returns>
         /// <remarks>
         /// <list type="bullet">
-        ///   <item><description>Before storing new input, the input RAM is cleared (all values set to 0).</description></item>
-        ///   <item><description>Bytes will always be stored at the start of INPUT_RAM array.</description></item>
-        ///   <item><description>If the input is a number, its byte value is written to INPUT_RAM[0].</description></item>
-        ///   <item><description>If the input is text, each character's ASCII code is stored sequentially in INPUT_RAM, ending with a null terminator (0).</description></item>
+        ///   <item><description>Use #pragma string_input true/false to expect numeric values or strings as input.</description></item>
+        ///   <item><description>If input is a string, the input RAM is cleared. Then, each character's ASCII code is stored sequentially in INPUT_RAM, ending with a null terminator (0)</description></item>
         /// </list>
         /// </remarks>
         private byte GetUserInput()
@@ -74,16 +72,19 @@ namespace interpreter.Core
             if (string.IsNullOrWhiteSpace(input))
                 throw InvalidInputException.Generic();
 
-            Array.Clear(vm.UserInputRAM);
-            
-            if (int.TryParse(input.Trim(), out int value) && value >= byte.MinValue && value <= byte.MaxValue)
+            if (!instructionSettings[vm.IP].StringInput)
             {
-                vm.UserInputRAM[0] = (byte)value;
-                Log.PrintMessage($"[INTERPRETER] User input parsed to: {value}");
-                return 0;
+                if (int.TryParse(input.Trim(), out int value) && value >= byte.MinValue && value <= byte.MaxValue)
+                {
+                    Log.PrintMessage($"[INTERPRETER] User input parsed to: {value}");
+                    return (byte)value;
+                }
+                throw InvalidInputException.OutOfRangeChar(input);
             }
 
-            // Its minus 1 because we need to leave space for the null terminator
+            Array.Clear(vm.UserInputRAM);
+
+            // Its minus 1 because we need to leave space for the string terminator (0)
             if (input.Length >= VirtualMachine.MAX_RAM - 1)
                 throw InvalidInputException.LengthExceeded(input, VirtualMachine.MAX_RAM - 1);
 
@@ -94,7 +95,7 @@ namespace interpreter.Core
                 vm.UserInputRAM[i] = (byte)input[i];
                 Log.PrintMessage($"[INTERPRETER] User input RAM[{i}] set to: {vm.UserInputRAM[i]}");
             }
-            return 1;
+            return (byte)input.Length;
         }
     
         private string SetVariable(byte variableCode, byte value)

@@ -1,0 +1,20 @@
+#pragma string_input true
+print "What is your name?\n>>"
+mov input to reg1
+
+#pragma string_input false
+print "What is your favourite number?\n>>"
+mov input to reg0
+
+print "I see! So your name is "
+
+// Loop to send all bytes in input_ram to output
+#pragma char true
+label flush_input
+print input_ram
+next address
+if address <= reg1 flush_input
+#pragma char false
+
+print " and your favourite number is "
+print reg0

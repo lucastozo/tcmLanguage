@@ -115,7 +115,8 @@ namespace interpreter.Parsing
                 {
                     Overflow = currentSettings.Overflow,
                     CharOutput = currentSettings.CharOutput,
-                    SignedMode = currentSettings.SignedMode
+                    SignedMode = currentSettings.SignedMode,
+                    StringInput = currentSettings.StringInput
                 };
                 context.InstructionSettings.Add(settingsSnapshot);
                 
