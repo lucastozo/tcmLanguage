@@ -1,5 +1,3 @@
-using interpreter.Utils;
-
 namespace interpreter.Parsing
 {
     public static class PragmaProcessor

@@ -1,5 +1,3 @@
-using interpreter.Utils;
-
 namespace interpreter.Core
 {
     class VirtualMachine
