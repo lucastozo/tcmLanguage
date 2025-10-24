@@ -65,9 +65,7 @@ namespace interpreter.Core
         {
             Console.InputEncoding = Encoding.UTF8;
 
-            Log.PrintMessage("[INTERPRETER] INPUT requested");
             string? input = Console.ReadLine();
-            Log.PrintMessage($"[INTERPRETER] User input received: {input}");
 
             if (string.IsNullOrWhiteSpace(input))
                 throw InvalidInputException.Generic();
@@ -76,7 +74,6 @@ namespace interpreter.Core
             {
                 if (int.TryParse(input.Trim(), out int value) && value >= byte.MinValue && value <= byte.MaxValue)
                 {
-                    Log.PrintMessage($"[INTERPRETER] User input parsed to: {value}");
                     return (byte)value;
                 }
                 throw InvalidInputException.OutOfRangeChar(input);
@@ -93,7 +90,6 @@ namespace interpreter.Core
                 if (input[i] > byte.MaxValue)
                     throw InvalidInputException.OutOfRangeChar(input);
                 vm.UserInputRAM[i] = (byte)input[i];
-                Log.PrintMessage($"[INTERPRETER] User input RAM[{i}] set to: {vm.UserInputRAM[i]}");
             }
             return (byte)input.Length;
         }
@@ -165,12 +161,10 @@ namespace interpreter.Core
     
         public void Run(List<Instruction> program)
         {
-            Log.PrintMessage("[INTERPRETER] initiating simulated program");
             try
             {
                 while (vm.IP < program.Count)
                 {
-                    vm.PrintState();
                     int oldIP = vm.IP;
                     Execute(program[vm.IP]);
 
@@ -184,22 +178,16 @@ namespace interpreter.Core
                         return;
                     }
                     if (vm.IP == oldIP) vm.IP++;
-
-                    Log.PrintMessage("-------------------------------");
                 }
             }
             catch (ProgramHaltException)
             {
-                Log.PrintMessage("[INTERPRETER] Program halted by HALT instruction");
+                
             }
-            vm.PrintState();
-            Log.PrintMessage("-- END OF SIMULATED PROGRAM --");
         }
     
         private void Execute(Instruction instr)
         {
-            Log.PrintMessage($"Executing instruction: {instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}");
-
             // Handle system instructions before masking
             if (instr.Opcode >= Opcodes.SYSTEM_INSTRUCTION_START) // System instruction range
             {
@@ -211,10 +199,8 @@ namespace interpreter.Core
     
             // Change the value of arguments in case they are actually "variables"
             ResolveArguments(workingInstr);
-            Log.PrintMessage($"Arguments of instruction changed to: {workingInstr.Arg1} {workingInstr.Arg2}");
     
             byte baseOpcode = (byte)(workingInstr.Opcode & 0b00111111); // removes the 2 most significant bits
-            Log.PrintMessage($"Opcode decoded to: {baseOpcode}");
     
             // Execute OPCODE
             int _result = baseOpcode switch
@@ -258,28 +244,19 @@ namespace interpreter.Core
             }
 
             byte result = (byte)_result;
-    
-            Log.PrintMessage($"Result of ALU: {result}");
-    
+
             if (OpcodeIsConditional(baseOpcode))
             {
-                Log.PrintMessage("Conditional detected");
                 if (result == 0) return; // Conditional was not met
     
                 if (IsSubroutineAddress(workingInstr.Destination))
                 {
-                    Log.PrintMessage("Subroutine detected");
                     vm.CallStack.Push((byte)(vm.IP + 1));
-                    Log.PrintMessage($"Return address {vm.IP} pushed to stack");
                 }
     
                 vm.IP = workingInstr.Destination;
-                Log.PrintMessage($"Value {vm.IP} moved to Instruction Pointer");
                 return;
             }
-    
-            string variableChanged = SetVariable(workingInstr.Destination, result);
-            Log.PrintMessage($"Variable {variableChanged} received value {result}");
 
             if (workingInstr.Destination == Keywords.list["OUTPUT"])
             {
@@ -304,8 +281,6 @@ namespace interpreter.Core
                     Console.WriteLine(vm.Output);
                 }
             }
-    
-            Log.PrintMessage("Instruction executed");
         }
     
         private void ExecuteSystemInstruction(Instruction instr)

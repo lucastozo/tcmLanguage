@@ -42,11 +42,6 @@ namespace interpreter.Parsing
 
             if (IsLiteralValue(arg2, context)) finalOpcode |= ARG2_LITERAL_MASK;
 
-            if (finalOpcode != baseOpcode)
-            {
-                Log.PrintMessage($"[OPCODE MANAGER] Opcode adjusted from {baseOpcode} to {finalOpcode} at line {lineNumber}");
-            }
-
             return finalOpcode;
         }
 

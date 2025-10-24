@@ -9,34 +9,14 @@ namespace interpreter.Parsing
     
         public static (List<Instruction>, List<ParserSettings>) GetInstructionsWithSettings(string pathToFile)
         {
-            Log.PrintMessage("[PARSER] initiating");
-    
             var settings = new ParserSettings();
             string[] lines = File.ReadAllLines(pathToFile);
-
-            if (Log.ShowLogs)
-            {
-                Log.PrintMessage("Original program:\n");
-                foreach (string line in lines)
-                {
-                    Log.PrintMessage(line);
-                }
-            }
 
             ParserContext context = Preprocessor.ProcessFile(lines, settings);
 
             SubroutineAddresses = context.SubroutineAddresses;
 
             List<Instruction> instructions = BuildInstructions(context);
-    
-            if (Log.ShowLogs)
-            {
-                Log.PrintMessage("Final program:");
-                foreach (Instruction instr in instructions)
-                {
-                    Log.PrintMessage($"{instr.Opcode} {instr.Arg1} {instr.Arg2} {instr.Destination}");
-                }
-            }
     
             return (instructions, context.InstructionSettings);
         }

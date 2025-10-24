@@ -1,5 +1,4 @@
 using interpreter.Utils;
-using System.Text.RegularExpressions;
 
 namespace interpreter.Parsing
 {
@@ -14,7 +13,8 @@ namespace interpreter.Parsing
             {
                 Overflow = settings.Overflow,
                 CharOutput = settings.CharOutput,
-                SignedMode = settings.SignedMode
+                SignedMode = settings.SignedMode,
+                StringInput = settings.StringInput
             };
 
             // Preprocess
@@ -39,12 +39,7 @@ namespace interpreter.Parsing
                 }
                 processedLine = string.Join(' ', parts);
 
-                string completedLine = InstructionCompleter.CompleteInstruction(processedLine, i + 1);
-                if (completedLine != processedLine)
-                {
-                    Log.PrintMessage($"Line completed: '{processedLine}' -> '{completedLine}'");
-                    processedLine = completedLine;
-                }
+                processedLine = InstructionCompleter.CompleteInstruction(processedLine, i + 1);
                 
                 parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
 
@@ -99,7 +94,8 @@ namespace interpreter.Parsing
                         {
                             Overflow = currentSettings.Overflow,
                             CharOutput = currentSettings.CharOutput,
-                            SignedMode = currentSettings.SignedMode
+                            SignedMode = currentSettings.SignedMode,
+                            StringInput = currentSettings.StringInput
                         };
                         context.InstructionSettings.Add(expandedSettings);
 
@@ -124,7 +120,6 @@ namespace interpreter.Parsing
                 context.ProcesssedLines.Add(processedLine);
                 
                 context.OriginalLineNumbers.Add(i + 1);
-                Log.PrintMessage($"Line {rawLine} preprocessed sucessfully to {processedLine}");
                 instructionIndex++;
             }
 

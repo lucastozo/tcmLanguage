@@ -99,12 +99,10 @@ namespace interpreter.Parsing
 
             foreach (var kvp in Templates)
             {
-                string templateName = kvp.Key;
                 InstructionTemplate template = kvp.Value;
 
                 if (TryMatchPattern(parts, template.Pattern, out Dictionary<string, string> placeholders))
                 {
-                    Log.PrintMessage($"[INSTRUCTION COMPLETER] Expanding '{templateName}' at line {lineNumber}");
                     return ExpandTemplate(template.Expansion, placeholders);
                 }
             }

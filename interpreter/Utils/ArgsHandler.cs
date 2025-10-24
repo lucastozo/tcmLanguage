@@ -35,36 +35,7 @@ namespace interpreter.Utils
             {
                 string arg = args[i].ToLower();
                 switch (arg)
-                {       
-                    case "--log":
-                    case "-l":
-                        Log.ShowLogs = true;
-                        break;
-                        
-                    case "--write":
-                    case "-w":
-                        Log.WriteToFile = true;
-                        break;
-                        
-                    case "--size":
-                    case "-s":
-                        if (i + 1 < args.Length && int.TryParse(args[i + 1], out int sizeMB))
-                        {
-                            Log.MaxFileSizeBytes = sizeMB * 1024 * 1024;
-                            Log.PrintMessage($"Log file size limit set to {sizeMB}MB");
-                            i++;
-                        }
-                        else
-                        {
-                            Log.PrintError("Invalid or missing size value after --size");
-                        }
-                        break;
-                        
-                    case "--no-limit":
-                        Log.EnableSizeLimit = false;
-                        Log.PrintMessage("Log file size limit disabled");
-                        break;
-                        
+                {
                     default:
                         Log.PrintError($"Invalid option '{arg}'. Use -h or --help to get instructions");
                         break;
@@ -83,7 +54,7 @@ namespace interpreter.Utils
             {
                 ("--help, -h", "Show this help message."),
                 ("--version, -v", "Show the installed version of the interpreter."),
-                ("",""), // Just for newline
+                ("",""), // newline
                 ("--log, -l", "Enable logging and display log messages in the terminal."),
                 ("--write, -w", "Write log messages to a file (requires logging to be enabled)."),
                 ("--size, -s <MB>", "Set a custom maximum log file size (default: 12 MB)."),

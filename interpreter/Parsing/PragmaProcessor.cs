@@ -20,23 +20,15 @@ namespace interpreter.Parsing
             {
                 case "overflow":
                     settings.Overflow = enable;
-                    if (enable) Log.PrintMessage($"[PARSER] Pragma: overflow behavior enabled");
-                    else Log.PrintMessage($"[PARSER] Pragma: overflow behavior disabled");
                     break;
                 case "char":
                     settings.CharOutput = enable;
-                    if (enable) Log.PrintMessage($"[PARSER] Pragma: character output mode enabled");
-                    else Log.PrintMessage($"[PARSER] Pragma: character output mode disabled");
                     break;
                 case "signed":
                     settings.SignedMode = enable;
-                    if (enable) Log.PrintMessage($"[PARSER] Pragma: signed output mode enabled");
-                    else Log.PrintMessage($"[PARSER] Pragma: signed output mode disabled");
                     break;
                 case "string_input":
                     settings.StringInput = enable;
-                    if (enable) Log.PrintMessage($"[PARSER] Pragma: string input enabled");
-                    else Log.PrintMessage($"[PARSER] Pragma: string input disabled");
                     break;
                 default:
                     throw new Exception($"Unknown pragma option '{parts[1]}' at line {lineNumber}.");
