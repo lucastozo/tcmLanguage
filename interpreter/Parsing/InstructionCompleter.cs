@@ -34,7 +34,7 @@ namespace interpreter.Parsing
 
             ["RETURN"] = new InstructionTemplate(
                 pattern: ["RETURN"],
-                expansion: ["MOV", "STACK", "TO", "COUNTER"]
+                expansion: ["COPY", "STACK", "0", "COUNTER"]
             ),
 
             ["CALL"] = new InstructionTemplate(
@@ -44,7 +44,7 @@ namespace interpreter.Parsing
 
             ["PRINT"] = new InstructionTemplate(
                 pattern: ["PRINT", "{VALUE}"],
-                expansion: ["MOV", "{VALUE}", "TO", "OUTPUT"]
+                expansion: ["COPY", "{VALUE}", "0", "OUTPUT"]
             ),
 
             ["GOTO"] = new InstructionTemplate(
@@ -54,7 +54,7 @@ namespace interpreter.Parsing
 
             ["ASSIGNMENT"] = new InstructionTemplate(
                 pattern: ["{VARIABLE}", "=", "{VALUE}"],
-                expansion: ["MOV", "{VALUE}", "TO", "{VARIABLE}"]
+                expansion: ["COPY", "{VALUE}", "0", "{VARIABLE}"]
             ),
 
             ["IF_EQL"] = new InstructionTemplate(

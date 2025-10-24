@@ -94,34 +94,29 @@ namespace interpreter.Core
             return (byte)input.Length;
         }
     
-        private string SetVariable(byte variableCode, byte value)
+        private void SetVariable(byte variableCode, byte value)
         {
             // Use when "variables" are mentioned in destination (last byte)
     
             if (variableCode < VirtualMachine.MAX_REGISTERS)
             {
                 vm.Registers[variableCode] = value;
-                return $"REG{variableCode}";
             }
             if (variableCode == Keywords.list["OUTPUT"])
             {
                 vm.Output = value;
-                return "OUTPUT";
             }
             if (variableCode == Keywords.list["STACK"])
             {
                 vm.CallStack.Push(value);
-                return "STACK";
             }
             if (variableCode == Keywords.list["RAM"])
             {
                 vm.RAM[vm.Registers[REG_RAM_ADDRESS]] = value;
-                return "RAM";
             }
             if (variableCode == Keywords.list["COUNTER"])
             {
                 vm.IP = value;
-                return "COUNTER";
             }
 
             throw new InvalidStorageAreaException(variableCode);
@@ -246,15 +241,17 @@ namespace interpreter.Core
             if (OpcodeIsConditional(baseOpcode))
             {
                 if (result == 0) return; // Conditional was not met
-    
+
                 if (IsSubroutineAddress(workingInstr.Destination))
                 {
                     vm.CallStack.Push((byte)(vm.IP + 1));
                 }
-    
+
                 vm.IP = workingInstr.Destination;
                 return;
             }
+
+            SetVariable(workingInstr.Destination, result);
 
             if (workingInstr.Destination == Keywords.list["OUTPUT"])
             {
