@@ -12,7 +12,7 @@ namespace interpreter.Parsing
             }
             if (!hasString) return [];
 
-            if (parts[0] != "COPY" || parts[2] != "0" || parts[3] != "OUTPUT")
+            if (parts[0] != "ADD" || parts[2] != "0" || parts[3] != "OUTPUT")
             {
                 throw new Exception($"Invalid string usage at line {lineNumber}. Expected \"PRINT <string>\"");
             }
@@ -34,28 +34,28 @@ namespace interpreter.Parsing
                     switch (nextChar)
                     {
                         case 'n': // Newline \n
-                            expansions.Add($"COPY {(byte)'\n'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'\n'} 0 OUTPUT");
                             break;
                         case 'b': // Backspace \b
-                            expansions.Add($"COPY {(byte)'\b'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'\b'} 0 OUTPUT");
                             break;
                         case 't': // hTab \t
-                            expansions.Add($"COPY {(byte)'\t'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'\t'} 0 OUTPUT");
                             break;
                         case 'v': // vTab \v
-                            expansions.Add($"COPY {(byte)'\v'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'\v'} 0 OUTPUT");
                             break;
                         case 'r': // Carriage return \r
-                            expansions.Add($"COPY {(byte)'\r'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'\r'} 0 OUTPUT");
                             break;
                         case '\\': // Backslash \\
-                            expansions.Add($"COPY {(byte)'\\'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'\\'} 0 OUTPUT");
                             break;
                         case '\"': // Quote \"
-                            expansions.Add($"COPY {(byte)'\"'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'\"'} 0 OUTPUT");
                             break;
                         case '/': // Forward slash \/
-                            expansions.Add($"COPY {(byte)'/'} 0 OUTPUT");
+                            expansions.Add($"ADD {(byte)'/'} 0 OUTPUT");
                             break;
                         default:
                             throw new Exception($"Invalid escape sequence \"{c}{nextChar}\" inside string at line {lineNumber}");
@@ -63,7 +63,7 @@ namespace interpreter.Parsing
                 }
                 else
                 {
-                    expansions.Add($"COPY {(byte)c} 0 OUTPUT"); // normal char
+                    expansions.Add($"ADD {(byte)c} 0 OUTPUT"); // normal char
                 }
             }
             

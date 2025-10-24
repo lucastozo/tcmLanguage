@@ -42,7 +42,7 @@ namespace interpreter.Core
             if (variableCode == Keywords.list["INPUT"]) return GetUserInput();
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
             if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
-            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.UserInputRAM[vm.Registers[REG_RAM_ADDRESS]];
+            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.InputRAM[vm.Registers[REG_RAM_ADDRESS]];
             if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
 
             throw new InvalidStorageAreaException(variableCode);
@@ -78,7 +78,7 @@ namespace interpreter.Core
                 throw InvalidInputException.OutOfRangeChar(input);
             }
 
-            Array.Clear(vm.UserInputRAM);
+            Array.Clear(vm.InputRAM);
 
             // Its minus 1 because we need to leave space for the string terminator (0)
             if (input.Length >= VirtualMachine.MAX_RAM - 1)
@@ -88,7 +88,7 @@ namespace interpreter.Core
             {
                 if (input[i] > byte.MaxValue)
                     throw InvalidInputException.OutOfRangeChar(input);
-                vm.UserInputRAM[i] = (byte)input[i];
+                vm.InputRAM[i] = (byte)input[i];
             }
             return (byte)input.Length;
         }
@@ -100,22 +100,27 @@ namespace interpreter.Core
             if (variableCode < VirtualMachine.MAX_REGISTERS)
             {
                 vm.Registers[variableCode] = value;
+                return;
             }
             if (variableCode == Keywords.list["OUTPUT"])
             {
                 vm.Output = value;
+                return;
             }
             if (variableCode == Keywords.list["STACK"])
             {
                 vm.CallStack.Push(value);
+                return;
             }
             if (variableCode == Keywords.list["RAM"])
             {
                 vm.RAM[vm.Registers[REG_RAM_ADDRESS]] = value;
+                return;
             }
             if (variableCode == Keywords.list["COUNTER"])
             {
                 vm.IP = value;
+                return;
             }
 
             throw new InvalidStorageAreaException(variableCode);

@@ -54,11 +54,6 @@ namespace interpreter.Utils
             {
                 ("--help, -h", "Show this help message."),
                 ("--version, -v", "Show the installed version of the interpreter."),
-                ("",""), // newline
-                ("--log, -l", "Enable logging and display log messages in the terminal."),
-                ("--write, -w", "Write log messages to a file (requires logging to be enabled)."),
-                ("--size, -s <MB>", "Set a custom maximum log file size (default: 12 MB)."),
-                ("--no-limit", "Disable the log file size limit (may create extremely large files).")
             };
 
             int width = 0;

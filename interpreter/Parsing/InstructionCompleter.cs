@@ -22,39 +22,24 @@ namespace interpreter.Parsing
                 expansion: ["CLEAR", "0", "0", "0"]
             ),
 
-            ["PREVIOUS"] = new InstructionTemplate(
-                pattern: ["PREVIOUS", "{VARIABLE}"],
-                expansion: ["SUB", "{VARIABLE}", "1", "{VARIABLE}"]
-            ),
-
-            ["NEXT"] = new InstructionTemplate(
-                pattern: ["NEXT", "{VARIABLE}"],
-                expansion: ["ADD", "{VARIABLE}", "1", "{VARIABLE}"]
+            ["COPY"] = new InstructionTemplate(
+                pattern: ["COPY", "{SOURCE}", "{DESTINATION}"],
+                expansion: ["ADD", "{SOURCE}", "0", "{DESTINATION}"]
             ),
 
             ["RETURN"] = new InstructionTemplate(
                 pattern: ["RETURN"],
-                expansion: ["COPY", "STACK", "0", "COUNTER"]
-            ),
-
-            ["CALL"] = new InstructionTemplate(
-                pattern: ["CALL", "{SUBROUTINE}"],
-                expansion: [$"{Opcodes.IF_LES}", "0", "255", "{SUBROUTINE}"]
+                expansion: ["ADD", "STACK", "0", "COUNTER"]
             ),
 
             ["PRINT"] = new InstructionTemplate(
                 pattern: ["PRINT", "{VALUE}"],
-                expansion: ["COPY", "{VALUE}", "0", "OUTPUT"]
+                expansion: ["ADD", "{VALUE}", "0", "OUTPUT"]
             ),
 
             ["GOTO"] = new InstructionTemplate(
                 pattern: ["GOTO", "{LABEL}"],
                 expansion: [$"{Opcodes.IF_EQL}", "0", "0", "{LABEL}"]
-            ),
-
-            ["ASSIGNMENT"] = new InstructionTemplate(
-                pattern: ["{VARIABLE}", "=", "{VALUE}"],
-                expansion: ["COPY", "{VALUE}", "0", "{VARIABLE}"]
             ),
 
             ["IF_EQL"] = new InstructionTemplate(
@@ -81,7 +66,7 @@ namespace interpreter.Parsing
                 pattern: ["IF", "{A}", "<=", "{B}", "{TARGET}"],
                 expansion: [$"{Opcodes.IF_LOE}", "{A}", "{B}", "{TARGET}"]
             ),
-            
+
             ["IF_NEQ"] = new InstructionTemplate(
                 pattern: ["IF", "{A}", "!=", "{B}", "{TARGET}"],
                 expansion: [$"{Opcodes.IF_NEQ}", "{A}", "{B}", "{TARGET}"]
