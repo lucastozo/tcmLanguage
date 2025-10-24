@@ -2,40 +2,52 @@ namespace interpreter.Utils
 {
     class Keywords
     {
-        public static readonly IReadOnlyDictionary<string, byte> list = new Dictionary<string, byte>
+        public static readonly IReadOnlyDictionary<string, byte> list;
+
+        private const byte REG_MAX = Core.VirtualMachine.MAX_REGISTERS;
+
+        static Keywords()
         {
-            ["ADD"] = Opcodes.ADD,
-            ["ADDRESS"] = Core.Interpreter.REG_RAM_ADDRESS,
-            ["AND"] = Opcodes.AND,
-            ["ASHR"] = Opcodes.ASHR,
-            ["CLEAR"] = Opcodes.CLEAR,
-            ["COUNTER"] = 6,
-            ["DIV"] = Opcodes.DIV,
-            ["HALT"] = Opcodes.HALT,
-            ["INPUT"] = 9,
-            ["INPUT_RAM"] = 11,
-            ["MOD"] = Opcodes.MOD,
-            ["MOV"] = 64,
-            ["MULTIPLY"] = Opcodes.MULTIPLY,
-            ["NOT_A"] = Opcodes.NOT_A,
-            ["OR"] = Opcodes.OR,
-            ["OUTPUT"] = 7,
-            ["RAM"] = 10,
-            ["REG0"] = 0,
-            ["REG1"] = 1,
-            ["REG2"] = 2,
-            ["REG3"] = 3,
-            ["REG4"] = 4,
-            ["REG5"] = 5,
-            ["ROL"] = Opcodes.ROL,
-            ["ROR"] = Opcodes.ROR,
-            ["SHL"] = Opcodes.SHL,
-            ["SHR"] = Opcodes.SHR,
-            ["STACK"] = 8,
-            ["SUB"] = Opcodes.SUB,
-            ["TO"] = 0,
-            ["WAIT"] = Opcodes.WAIT,
-            ["XOR"] = Opcodes.XOR
-        };
+            var dict = new Dictionary<string, byte>
+            {
+                // ["REG0"] ... ["REGMAX"]
+                ["ADDRESS"] = Core.Interpreter.REG_RAM_ADDRESS,
+
+                ["COUNTER"] = REG_MAX + 1,
+                ["OUTPUT"] = REG_MAX + 2,
+                ["STACK"] = REG_MAX + 3,
+                ["INPUT"] = REG_MAX + 4,
+                ["RAM"] = REG_MAX + 5,
+                ["INPUT_RAM"] = REG_MAX + 6,
+
+                ["COPY"] = Opcodes.ADD | 0b01000000,
+
+                ["ADD"] = Opcodes.ADD,
+                ["SUB"] = Opcodes.SUB,
+                ["MUL"] = Opcodes.MUL,
+                ["DIV"] = Opcodes.DIV,
+                ["MOD"] = Opcodes.MOD,
+
+                ["AND"] = Opcodes.AND,
+                ["OR"] = Opcodes.OR,
+                ["XOR"] = Opcodes.XOR,
+
+                ["SHL"] = Opcodes.SHL,
+                ["SHR"] = Opcodes.SHR,
+                ["ROL"] = Opcodes.ROL,
+                ["ROR"] = Opcodes.ROR,
+
+                ["WAIT"] = Opcodes.WAIT,
+                ["HALT"] = Opcodes.HALT,
+                ["CLEAR"] = Opcodes.CLEAR
+            };
+
+            for (byte i = 0; i <= REG_MAX; i++)
+            {
+                dict[$"REG{i}"] = i;
+            }
+
+            list = new System.Collections.ObjectModel.ReadOnlyDictionary<string, byte>(dict);
+        }
     }
 }
