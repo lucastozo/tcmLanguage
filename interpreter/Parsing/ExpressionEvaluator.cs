@@ -9,11 +9,6 @@ namespace interpreter.Parsing
         {
             try
             {
-                if (ContainsOperators(expression))
-                {
-                    return (byte)ParseExpression(expression, context, allowOverflow, lineNumber);
-                }
-    
                 if (expression.All(char.IsDigit))
                 {
                     int v = int.Parse(expression);
@@ -40,7 +35,7 @@ namespace interpreter.Parsing
                         return (byte)value;
                     }
                 }
-    
+                
                 if (context.Labels.TryGetValue(expression, out int labelAddr))
                 {
                     return (byte)labelAddr;
@@ -61,97 +56,6 @@ namespace interpreter.Parsing
             catch (Exception ex) when (!(ex.Message.StartsWith("Unknown token") || ex.Message.StartsWith("Value")))
             {
                 throw new Exception($"Error evaluating expression '{expression}' at line {lineNumber}: {ex.Message}");
-            }
-        }
-    
-        private static bool ContainsOperators(string expression)
-        {
-            return expression.Contains('|') || expression.Contains('+') || expression.Contains('-') ||
-                   expression.Contains('*') || expression.Contains('/') || expression.Contains('%') ||
-                   expression.Contains('^') || expression.Contains('&');
-        }
-    
-        private static int ParseExpression(string expression, ParserContext context, bool allowOverflow = false, int lineNumber = 0)
-        {
-            // Handle operators
-            // 1. Multiplication (*), Division (/), Modulo (%)
-            // 2. Addition (+), Subtraction (-)
-            // 3. Bitwise operations (|, ^, &)
-    
-            if (expression.Contains('|'))
-            {
-                return ParseBinaryOperation(expression, '|', context, (a, b) => a | b, allowOverflow, lineNumber);
-            }
-            if (expression.Contains('^'))
-            {
-                return ParseBinaryOperation(expression, '^', context, (a, b) => a ^ b, allowOverflow, lineNumber);
-            }
-            if (expression.Contains('&'))
-            {
-                return ParseBinaryOperation(expression, '&', context, (a, b) => a & b, allowOverflow, lineNumber);
-            }
-    
-            if (expression.Contains('+'))
-            {
-                return ParseBinaryOperation(expression, '+', context, (a, b) => a + b, allowOverflow, lineNumber);
-            }
-            if (expression.Contains('-'))
-            {
-                return ParseBinaryOperation(expression, '-', context, (a, b) => a - b, allowOverflow, lineNumber);
-            }
-    
-            if (expression.Contains('*'))
-            {
-                return ParseBinaryOperation(expression, '*', context, (a, b) => a * b, allowOverflow, lineNumber);
-            }
-            if (expression.Contains('/'))
-            {
-                return ParseBinaryOperation(expression, '/', context, (a, b) =>
-                {
-                    if (b == 0) throw new Exception("Division by zero");
-                    return a / b;
-                }, allowOverflow, lineNumber);
-            }
-            if (expression.Contains('%'))
-            {
-                return ParseBinaryOperation(expression, '%', context, (a, b) =>
-                {
-                    if (b == 0) throw new Exception("Modulo by zero");
-                    return a % b;
-                }, allowOverflow, lineNumber);
-            }
-    
-            throw new Exception($"Invalid expression '{expression}'");
-        }
-    
-        private static int ParseBinaryOperation(string expression, char op, ParserContext context,
-                                              Func<int, int, int> operation, bool allowOverflow = false, int lineNumber = 0)
-        {
-            int opIndex = expression.IndexOf(op);
-            if (opIndex == -1) return ParseExpression(expression, context, allowOverflow, lineNumber);
-    
-            string left = expression.Substring(0, opIndex).Trim();
-            string right = expression.Substring(opIndex + 1).Trim();
-
-            int leftVal = EvaluateExpression(left, context, lineNumber, allowOverflow);
-            int rightVal = EvaluateExpression(right, context, lineNumber, allowOverflow);
-            int result = operation(leftVal, rightVal);
-    
-            if (allowOverflow)
-            {
-                if (result < 0)
-                {
-                    while (result < 0) result += 256;
-                }
-                return result % 256;
-            }
-            else
-            {
-                if (result < byte.MinValue || result > byte.MaxValue)
-                {
-                    throw new Exception($"Expression result {result} out of range ({byte.MinValue}-{byte.MaxValue})");
-                }
-                return result;
             }
         }
     }

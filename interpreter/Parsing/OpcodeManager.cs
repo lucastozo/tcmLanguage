@@ -61,20 +61,10 @@ namespace interpreter.Parsing
             if (context.Subroutines.ContainsKey(value))
                 return true;
 
-            if (ContainsOperators(value))
-                return true;
-
             if (IsRegisterOrVariable(value))
                 return false;
 
             return true;
-        }
-
-        private static bool ContainsOperators(string value)
-        {
-            return value.Contains('+') || value.Contains('-') || value.Contains('*') ||
-                   value.Contains('/') || value.Contains('%') || value.Contains('|') ||
-                   value.Contains('^') || value.Contains('&');
         }
 
         private static bool IsRegisterOrVariable(string value)
