@@ -8,7 +8,7 @@ namespace interpreter.Core
     {
         private VirtualMachine vm;
         private List<ParserSettings> instructionSettings;
-        public const byte REG_RAM_ADDRESS = 5; // REG5 controls the address of RAM
+        public const byte REG_RAM_ADDRESS = Core.VirtualMachine.MAX_REGISTERS - 1; // Last REG controls the address of RAM
 
         public Interpreter(VirtualMachine vm, List<ParserSettings> settings)
         {
