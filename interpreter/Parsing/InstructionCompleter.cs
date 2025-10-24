@@ -39,37 +39,37 @@ namespace interpreter.Parsing
 
             ["GOTO"] = new InstructionTemplate(
                 pattern: ["GOTO", "{LABEL}"],
-                expansion: [$"{Opcodes.IF_EQL}", "0", "0", "{LABEL}"]
+                expansion: [$"ADD", "{LABEL}", "0", "COUNTER"]
             ),
 
             ["IF_EQL"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "==", "{B}", "{TARGET}"],
-                expansion: [$"{Opcodes.IF_EQL}", "{A}", "{B}", "{TARGET}"]
+                pattern: ["IF", "{A}", "==", "{B}"],
+                expansion: [$"{Opcodes.IF_EQL}", "{A}", "{B}", "0"]
             ),
 
             ["IF_GOE"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", ">=", "{B}", "{TARGET}"],
-                expansion: [$"{Opcodes.IF_GOE}", "{A}", "{B}", "{TARGET}"]
+                pattern: ["IF", "{A}", ">=", "{B}"],
+                expansion: [$"{Opcodes.IF_GOE}", "{A}", "{B}", "0"]
             ),
 
             ["IF_GRT"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", ">", "{B}", "{TARGET}"],
-                expansion: [$"{Opcodes.IF_GRT}", "{A}", "{B}", "{TARGET}"]
+                pattern: ["IF", "{A}", ">", "{B}"],
+                expansion: [$"{Opcodes.IF_GRT}", "{A}", "{B}", "0"]
             ),
 
             ["IF_LES"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "<", "{B}", "{TARGET}"],
-                expansion: [$"{Opcodes.IF_LES}", "{A}", "{B}", "{TARGET}"]
+                pattern: ["IF", "{A}", "<", "{B}"],
+                expansion: [$"{Opcodes.IF_LES}", "{A}", "{B}", "0"]
             ),
 
             ["IF_LOE"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "<=", "{B}", "{TARGET}"],
-                expansion: [$"{Opcodes.IF_LOE}", "{A}", "{B}", "{TARGET}"]
+                pattern: ["IF", "{A}", "<=", "{B}"],
+                expansion: [$"{Opcodes.IF_LOE}", "{A}", "{B}", "0"]
             ),
 
             ["IF_NEQ"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "!=", "{B}", "{TARGET}"],
-                expansion: [$"{Opcodes.IF_NEQ}", "{A}", "{B}", "{TARGET}"]
+                pattern: ["IF", "{A}", "!=", "{B}"],
+                expansion: [$"{Opcodes.IF_NEQ}", "{A}", "{B}", "0"]
             )
         };
 

@@ -10,6 +10,14 @@ namespace interpreter.Core
         private List<ParserSettings> instructionSettings;
         public const byte REG_RAM_ADDRESS = Core.VirtualMachine.MAX_REGISTERS - 1; // Last REG controls the address of RAM
 
+        private enum LastInstructionConditional
+        {
+            WasntConditional = 0,
+            ConditionalButNotTrue = 1,
+            ConditionalAndTrue = 2
+        }
+        private LastInstructionConditional lastInstruction = LastInstructionConditional.WasntConditional;
+
         public Interpreter(VirtualMachine vm, List<ParserSettings> settings)
         {
             this.vm = vm;
@@ -187,6 +195,14 @@ namespace interpreter.Core
     
         private void Execute(Instruction instr)
         {
+            if (lastInstruction == LastInstructionConditional.ConditionalButNotTrue)
+            {
+                lastInstruction = LastInstructionConditional.WasntConditional;
+                return;
+            }
+
+            
+
             // Handle system instructions before masking
             if (instr.Opcode >= Opcodes.SYSTEM_INSTRUCTION_START) // System instruction range
             {
@@ -244,15 +260,19 @@ namespace interpreter.Core
 
             if (OpcodeIsConditional(baseOpcode))
             {
-                if (result == 0) return; // Conditional was not met
-
-                if (IsSubroutineAddress(workingInstr.Destination))
+                if (result == 0)
                 {
-                    vm.CallStack.Push((byte)(vm.IP + 1));
+                    lastInstruction = LastInstructionConditional.ConditionalButNotTrue;
+                    return; // Conditional was not met
                 }
 
-                vm.IP = workingInstr.Destination;
+                lastInstruction = LastInstructionConditional.ConditionalAndTrue;
                 return;
+            }
+
+            if (workingInstr.Destination == Keywords.list["COUNTER"] && IsSubroutineAddress(workingInstr.Arg1))
+            {
+                vm.CallStack.Push((byte)(vm.IP + 1));
             }
 
             SetVariable(workingInstr.Destination, result);
