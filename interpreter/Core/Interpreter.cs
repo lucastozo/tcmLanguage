@@ -40,7 +40,6 @@ namespace interpreter.Core
         {
             if (variableCode < VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
             if (variableCode == Keywords.list["INPUT"]) return GetUserInput();
-            if (variableCode == Keywords.list["OUTPUT"]) return vm.Output;
             if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
             if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
             if (variableCode == Keywords.list["INPUT_RAM"]) return vm.UserInputRAM[vm.Registers[REG_RAM_ADDRESS]];
