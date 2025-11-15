@@ -1,10 +1,10 @@
 #pragma string_input true
 print "What is your name?\n>>"
-mov input to reg1
+copy input reg1
 
 #pragma string_input false
 print "What is your favourite number?\n>>"
-mov input to reg0
+copy input reg0
 
 print "I see! So your name is "
 
@@ -12,8 +12,9 @@ print "I see! So your name is "
 #pragma char true
 label flush_input
 print input_ram
-next address
-if address <= reg1 flush_input
+add address 1 address
+if address <= reg1
+goto flush_input
 #pragma char false
 
 print " and your favourite number is "
