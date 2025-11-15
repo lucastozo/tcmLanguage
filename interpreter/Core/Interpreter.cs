@@ -74,12 +74,9 @@ namespace interpreter.Core
 
             string? input = Console.ReadLine();
 
-            if (string.IsNullOrWhiteSpace(input))
-                throw InvalidInputException.Generic();
-
             if (!instructionSettings[vm.IP].StringInput)
             {
-                if (int.TryParse(input.Trim(), out int value) && value >= byte.MinValue && value <= byte.MaxValue)
+                if (int.TryParse(input!.Trim(), out int value) && value >= byte.MinValue && value <= byte.MaxValue)
                 {
                     return (byte)value;
                 }
@@ -89,7 +86,7 @@ namespace interpreter.Core
             Array.Clear(vm.InputRAM);
 
             // Its minus 1 because we need to leave space for the string terminator (0)
-            if (input.Length >= VirtualMachine.MAX_RAM - 1)
+            if (input!.Length >= VirtualMachine.MAX_RAM - 1)
                 throw InvalidInputException.LengthExceeded(input, VirtualMachine.MAX_RAM - 1);
 
             for (int i = 0; i < input.Length; i++)
