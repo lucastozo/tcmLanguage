@@ -42,7 +42,7 @@ namespace interpreter.Utils
                 ["CLEAR"] = Opcodes.CLEAR
             };
 
-            for (byte i = 0; i <= REG_MAX; i++)
+            for (byte i = 0; i < REG_MAX; i++)
             {
                 dict[$"REG{i}"] = i;
             }
