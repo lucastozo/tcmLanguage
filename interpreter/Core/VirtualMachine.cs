@@ -3,7 +3,7 @@ namespace interpreter.Core
     class VirtualMachine
     {
         public const int MAX_RAM = 256;
-        public const int MAX_REGISTERS = 10; // REG0 - REG9
+        public const int MAX_REGISTERS = 30; // REG0 - REG29
     
         public byte[] RAM { get; } = new byte[MAX_RAM];
         public byte[] Registers { get; } = new byte[MAX_REGISTERS];
