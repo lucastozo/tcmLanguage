@@ -10,7 +10,7 @@ namespace interpreter.Parsing
                 if (part.Length < 2) continue;
                 if (part[0] == '\"' && part[^1] == '\"') hasString = true;
             }
-            if (!hasString) return [];
+            if (!hasString) return new List<string>();
 
             if (parts[0] != "ADD" || parts[2] != "0" || parts[3] != "OUTPUT")
             {
@@ -63,6 +63,10 @@ namespace interpreter.Parsing
                 }
                 else
                 {
+                    if (c == '"')
+                    {
+                        throw new Exception($"Unescaped quote inside string at line {lineNumber}. Use \\\" to escape quotes.");
+                    }
                     expansions.Add($"ADD {(byte)c} 0 OUTPUT"); // normal char
                 }
             }

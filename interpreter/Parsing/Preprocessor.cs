@@ -181,7 +181,21 @@ namespace interpreter.Parsing
             bool exceptionIsOpen = false;
             for (int i = 0; i < str.Length; i++)
             {
-                if (str[i] == exceptionChar) exceptionIsOpen = !exceptionIsOpen;
+                if (str[i] == exceptionChar)
+                {
+                    int backslashCount = 0;
+                    int j = i - 1;
+                    while (j >= 0 && str[j] == '\\')
+                    {
+                        backslashCount++;
+                        j--;
+                    }
+
+                    // If the quote is not escaped (even number of preceding backslashes), toggle
+                    if (backslashCount % 2 == 0)
+                        exceptionIsOpen = !exceptionIsOpen;
+                }
+
                 if (str[i] == splitChar && !exceptionIsOpen)
                 {
                     words.Add(word);
