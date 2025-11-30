@@ -1,11 +1,11 @@
 #!/bin/bash
-echo "Building TCM Interpreter for the current platform..."
+echo "Building..."
 echo
 
 PROJECT_PATH="./interpreter/interpreter.csproj"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    echo "Detected Linux/WSL environment — building Linux (x64)..."
+    echo "Building Linux (x64)..."
     rm -rf ./dist/linux
     mkdir -p ./dist/linux
     dotnet publish "$PROJECT_PATH" -c Release -r linux-x64 -o "./dist/linux"
@@ -21,7 +21,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo
     echo "Linux executable: ./dist/linux/tcmInterpreter-linux"
 elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    echo "Detected Windows environment — building Windows (x64)..."
+    echo "Building Windows (x64)..."
     rm -rf ./dist/windows
     mkdir -p ./dist/windows
     dotnet publish "$PROJECT_PATH" -c Release -r win-x64 -o "./dist/windows"
