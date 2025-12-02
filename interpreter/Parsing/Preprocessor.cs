@@ -146,15 +146,23 @@ namespace interpreter.Parsing
         private static void ProcessLabel(string[] parts, int lineNumber, ParserContext context, int instructionIndex)
         {
             if (parts.Length != 2)
-                throw new Exception($"Invalid label at line {lineNumber}");
+                throw new Exception($"Invalid label declaration at line {lineNumber}");
 
-            if (int.TryParse(parts[1], out _))
+            string label_name = parts[1];
+
+            if (int.TryParse(label_name, out _))
                 throw new Exception($"Label name must be a identifier at line {lineNumber}");
 
-            if (Utils.Keywords.list.ContainsKey(parts[1]))
+            if (Utils.Keywords.list.ContainsKey(label_name))
                 throw new Exception($"Label identifier can not be a reserved keyword at line {lineNumber}");
+            
+            if (context.Labels.ContainsKey(label_name))
+                throw new Exception($"A label with this identifier already exists at line {lineNumber}");
 
-            context.Labels.Add(parts[1], instructionIndex);
+            if (context.Subroutines.ContainsKey(label_name))
+                throw new Exception($"A subroutine with this identifier already exists at line {lineNumber}");
+
+            context.Labels.Add(label_name, instructionIndex);
         }
 
         private static void ProcessSubroutine(string[] parts, int lineNumber, ParserContext context, int instructionIndex)
@@ -162,11 +170,19 @@ namespace interpreter.Parsing
             if (parts.Length != 2)
                 throw new Exception($"Invalid subroutine declaration at line {lineNumber}");
 
-            if (int.TryParse(parts[1], out _))
+            string subroutine_name = parts[1];
+
+            if (int.TryParse(subroutine_name, out _))
                 throw new Exception($"Subroutine name must be a identifier at line {lineNumber}");
 
-            if (Utils.Keywords.list.ContainsKey(parts[1]))
+            if (Utils.Keywords.list.ContainsKey(subroutine_name))
                 throw new Exception($"Subroutine identifier can not be a reserved keyword at line {lineNumber}");
+
+            if (context.Labels.ContainsKey(subroutine_name))
+                throw new Exception($"A label with this identifier already exists at line {lineNumber}");
+
+            if (context.Subroutines.ContainsKey(subroutine_name))
+                throw new Exception($"A subroutine with this identifier already exists at line {lineNumber}");
 
             int address = instructionIndex;
             context.Subroutines.Add(parts[1], address);
