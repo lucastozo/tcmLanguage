@@ -43,32 +43,32 @@ namespace interpreter.Parsing
             ),
 
             ["IF_EQL"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "==", "{B}"],
+                pattern: ["IF", "{A}", "=", "{B}", "THEN"],
                 expansion: [$"{Opcodes.IF_EQL}", "{A}", "{B}", "0"]
             ),
 
             ["IF_GOE"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", ">=", "{B}"],
+                pattern: ["IF", "{A}", ">=", "{B}", "THEN"],
                 expansion: [$"{Opcodes.IF_GOE}", "{A}", "{B}", "0"]
             ),
 
             ["IF_GRT"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", ">", "{B}"],
+                pattern: ["IF", "{A}", ">", "{B}", "THEN"],
                 expansion: [$"{Opcodes.IF_GRT}", "{A}", "{B}", "0"]
             ),
 
             ["IF_LES"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "<", "{B}"],
+                pattern: ["IF", "{A}", "<", "{B}", "THEN"],
                 expansion: [$"{Opcodes.IF_LES}", "{A}", "{B}", "0"]
             ),
 
             ["IF_LOE"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "<=", "{B}"],
+                pattern: ["IF", "{A}", "<=", "{B}", "THEN"],
                 expansion: [$"{Opcodes.IF_LOE}", "{A}", "{B}", "0"]
             ),
 
             ["IF_NEQ"] = new InstructionTemplate(
-                pattern: ["IF", "{A}", "!=", "{B}"],
+                pattern: ["IF", "{A}", "!=", "{B}", "THEN"],
                 expansion: [$"{Opcodes.IF_NEQ}", "{A}", "{B}", "0"]
             )
         };
