@@ -29,7 +29,7 @@ namespace interpreter.Parsing
 
             ["RETURN"] = new InstructionTemplate(
                 pattern: ["RETURN"],
-                expansion: ["ADD", "STACK", "0", "COUNTER"]
+                expansion: ["RETURN", "0", "0", "0"]
             ),
 
             ["PRINT"] = new InstructionTemplate(

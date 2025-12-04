@@ -27,5 +27,6 @@ namespace interpreter.Utils
         public const byte HALT = 250;
         public const byte WAIT = 251;
         public const byte CLEAR = 252;
+        public const byte RETURN = 253;
     }
 }

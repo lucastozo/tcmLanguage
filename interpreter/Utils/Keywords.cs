@@ -39,7 +39,8 @@ namespace interpreter.Utils
 
                 ["WAIT"] = Opcodes.WAIT,
                 ["HALT"] = Opcodes.HALT,
-                ["CLEAR"] = Opcodes.CLEAR
+                ["CLEAR"] = Opcodes.CLEAR,
+                ["RETURN"] = Opcodes.RETURN
             };
 
             for (byte i = 0; i < REG_MAX; i++)

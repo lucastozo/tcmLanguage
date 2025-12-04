@@ -48,7 +48,10 @@ namespace interpreter.Core
         {
             if (variableCode < VirtualMachine.MAX_REGISTERS) return vm.Registers[variableCode];
             if (variableCode == Keywords.list["INPUT"]) return GetUserInput();
-            if (variableCode == Keywords.list["STACK"]) return vm.CallStack.Pop();
+            if (variableCode == Keywords.list["STACK"]) {
+                if (vm.UserStack.Count <= 0) throw EmptyStackException.UserStackEmpty();
+                return vm.UserStack.Pop();
+            }
             if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
             if (variableCode == Keywords.list["INPUT_RAM"]) return vm.InputRAM[vm.Registers[REG_RAM_ADDRESS]];
             if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
@@ -114,7 +117,7 @@ namespace interpreter.Core
             }
             if (variableCode == Keywords.list["STACK"])
             {
-                vm.CallStack.Push(value);
+                vm.UserStack.Push(value);
                 return;
             }
             if (variableCode == Keywords.list["RAM"])
@@ -267,6 +270,7 @@ namespace interpreter.Core
                 return;
             }
 
+            // GOTO subroutine
             if (workingInstr.Destination == Keywords.list["COUNTER"] && IsSubroutineAddress(workingInstr.Arg1))
             {
                 vm.CallStack.Push((byte)(vm.IP + 1));
@@ -310,6 +314,10 @@ namespace interpreter.Core
                     break;
                 case Opcodes.CLEAR:
                     Console.Clear();
+                    break;
+                case Opcodes.RETURN:
+                    if (vm.CallStack.Count <= 0) throw EmptyStackException.CallStackEmpty();
+                    vm.IP = vm.CallStack.Pop();
                     break;
                 default:
                     throw new NotImplementedException($"System instruction {instr.Opcode} not implemented");
