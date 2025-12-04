@@ -11,6 +11,9 @@ namespace interpreter.Core
 
         public int IP { get; set; } = 0;
         public Stack<byte> CallStack { get; } = new Stack<byte>();
+        // TODO (UserStack):
+        //  Implement this new UserStack, a separate stack where user cant fuck up the call stack and break his program
+        public Stack<byte> UserStack { get; } = new Stack<byte>();
         public byte Output { get; set; } = 0;
     }
 }
