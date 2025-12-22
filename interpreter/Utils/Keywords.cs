@@ -11,14 +11,14 @@ namespace interpreter.Utils
             var dict = new Dictionary<string, byte>
             {
                 // ["REG0"] ... ["REGMAX"]
-                ["ADDRESS"] = Core.Interpreter.REG_RAM_ADDRESS,
+                ["ADDRESS"] = REG_MAX + 1,
 
-                ["COUNTER"] = REG_MAX + 1,
-                ["OUTPUT"] = REG_MAX + 2,
-                ["STACK"] = REG_MAX + 3,
-                ["INPUT"] = REG_MAX + 4,
-                ["RAM"] = REG_MAX + 5,
-                ["INPUT_RAM"] = REG_MAX + 6,
+                ["COUNTER"] = REG_MAX + 2,
+                ["OUTPUT"] = REG_MAX + 3,
+                ["STACK"] = REG_MAX + 4,
+                ["INPUT"] = REG_MAX + 5,
+                ["RAM"] = REG_MAX + 6,
+                ["INPUT_RAM"] = REG_MAX + 7,
 
                 ["COPY"] = Opcodes.ADD | 0b01000000,
 

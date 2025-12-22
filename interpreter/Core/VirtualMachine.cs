@@ -6,6 +6,7 @@ namespace interpreter.Core
         public const int MAX_REGISTERS = 30; // REG0 - REG29
     
         public byte[] RAM { get; } = new byte[MAX_RAM];
+        public byte Address { get; set; } = 0;
         public byte[] Registers { get; } = new byte[MAX_REGISTERS];
         public byte[] InputRAM { get; } = new byte[MAX_RAM];
 

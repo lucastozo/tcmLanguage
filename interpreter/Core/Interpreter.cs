@@ -8,7 +8,6 @@ namespace interpreter.Core
     {
         private VirtualMachine vm;
         private List<ParserSettings> instructionSettings;
-        public const byte REG_RAM_ADDRESS = Core.VirtualMachine.MAX_REGISTERS - 1; // Last REG controls the address of RAM
 
         private enum LastInstructionConditional
         {
@@ -52,8 +51,9 @@ namespace interpreter.Core
                 if (vm.UserStack.Count <= 0) throw EmptyStackException.UserStackEmpty();
                 return vm.UserStack.Pop();
             }
-            if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Registers[REG_RAM_ADDRESS]];
-            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.InputRAM[vm.Registers[REG_RAM_ADDRESS]];
+            if (variableCode == Keywords.list["ADDRESS"]) return vm.Address;
+            if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Address];
+            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.InputRAM[vm.Address];
             if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
 
             throw new InvalidStorageAreaException(variableCode);
@@ -120,9 +120,14 @@ namespace interpreter.Core
                 vm.UserStack.Push(value);
                 return;
             }
+            if (variableCode == Keywords.list["ADDRESS"])
+            {
+                vm.Address = value;
+                return;
+            }
             if (variableCode == Keywords.list["RAM"])
             {
-                vm.RAM[vm.Registers[REG_RAM_ADDRESS]] = value;
+                vm.RAM[vm.Address] = value;
                 return;
             }
             if (variableCode == Keywords.list["COUNTER"])
