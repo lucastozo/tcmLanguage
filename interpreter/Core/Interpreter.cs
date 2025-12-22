@@ -56,7 +56,7 @@ namespace interpreter.Core
             if (variableCode == Keywords.list["INPUT_RAM"]) return vm.InputRAM[vm.Address];
             if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
 
-            throw new InvalidStorageAreaException(variableCode);
+            throw InvalidStorageAreaException.ReadFailure(variableCode);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace interpreter.Core
                 return;
             }
 
-            throw new InvalidStorageAreaException(variableCode);
+            throw InvalidStorageAreaException.WriteFailure(variableCode);
         }
     
         private bool OpcodeIsConditional(byte opcode)
