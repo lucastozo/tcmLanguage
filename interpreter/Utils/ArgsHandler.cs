@@ -47,7 +47,7 @@ namespace interpreter.Utils
 
         private static void PrintHelp()
         {
-            Console.WriteLine("Usage: tcmInterpreter <file> [options]");
+            Console.WriteLine($"Usage: {Assembly.GetExecutingAssembly().GetName().Name} <file> [options]");
             Console.WriteLine("\nOptions:");
 
             var options = new List<(string Option, string Description)>
@@ -72,6 +72,7 @@ namespace interpreter.Utils
 
         public static string GetVersion()
         {
+            var name = Assembly.GetExecutingAssembly().GetName().Name;
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             string versionString = Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
@@ -83,7 +84,7 @@ namespace interpreter.Utils
                 versionString = versionString.Substring(0, plusIndex + 8);
             }
 
-            return $"tcmInterpreter {versionString}";
+            return $"{name} {versionString}";
         }
     }
 }
