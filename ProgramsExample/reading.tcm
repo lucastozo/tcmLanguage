@@ -13,7 +13,7 @@ print "I see! So your name is "
 label flush_input
 print input_ram
 add address 1 address
-if address <= reg1
+if address <= reg1 then
 goto flush_input
 #pragma char false
 

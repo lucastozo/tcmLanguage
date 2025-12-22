@@ -9,6 +9,6 @@ add reg3 1 reg3
 add reg0 reg1 reg2
 copy reg1 reg0
 copy reg2 reg1
-if reg3 < reg4
+if reg3 < reg4 then
 goto lab_loop
 print reg2

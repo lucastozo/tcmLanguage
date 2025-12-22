@@ -27,20 +27,20 @@ copy ram elem_a
 add address 1 address
 copy ram elem_b
 
-if reg0 > reg1
+if reg0 > reg1 then
 goto sub_swap
 
-if address < array_len
+if address < array_len then
 goto lab_loop2
 
-if swap_occurred == true 
+if swap_occurred = true then
 goto lab_loop1
 
 copy 0 address
 label lab_outputSorted
 print ram
 add address 1 address
-if address <= array_len 
+if address <= array_len then
 goto lab_outputSorted
 halt
 
