@@ -16,6 +16,8 @@ namespace interpreter.Utils
         public const byte SHR = 9;
         public const byte ROL = 10;
         public const byte ROR = 11;
+        public const byte POW = 12;
+        public const byte NRT = 13; // Nth Root
         public const byte IF_EQL = 16;
         public const byte IF_NEQ = 17;
         public const byte IF_LES = 18;

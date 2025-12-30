@@ -223,6 +223,11 @@ namespace interpreter.Core
             byte baseOpcode = (byte)(workingInstr.Opcode & 0b00111111); // removes the 2 most significant bits
     
             // Execute OPCODE
+
+            // For ROL & ROR
+            int shift = workingInstr.Arg2 & 7;
+            int v = workingInstr.Arg1 & 0xFF;
+
             int _result = baseOpcode switch
             {
                 Opcodes.ADD => workingInstr.Arg1 + workingInstr.Arg2,
@@ -233,16 +238,24 @@ namespace interpreter.Core
                 Opcodes.MUL => workingInstr.Arg1 * workingInstr.Arg2,
                 Opcodes.DIV => workingInstr.Arg1 / workingInstr.Arg2,
                 Opcodes.MOD => workingInstr.Arg1 % workingInstr.Arg2,
+
                 Opcodes.SHL => workingInstr.Arg1 << workingInstr.Arg2,
                 Opcodes.SHR => workingInstr.Arg1 >> workingInstr.Arg2,
-                Opcodes.ROL => (workingInstr.Arg1 << workingInstr.Arg2) | (workingInstr.Arg1 >> (8 - workingInstr.Arg2)),
-                Opcodes.ROR => (workingInstr.Arg1 >> workingInstr.Arg2) | (workingInstr.Arg1 << (8 - workingInstr.Arg2)),
+                Opcodes.ROL => ((v << shift) | (v >> (8 - shift))) & 0xFF,
+                Opcodes.ROR => ((v >> shift) | (v << (8 - shift))) & 0xFF,
+
+                // TODO: POW & NRT might break using Math.Pow. Perhaps implement my own version?
+                Opcodes.POW => (int)Math.Pow(workingInstr.Arg1, workingInstr.Arg2),
+                Opcodes.NRT when workingInstr.Arg2 == 0 => throw new ArithmeticException("NRT with exponent 0"),
+                Opcodes.NRT => (int)Math.Pow(workingInstr.Arg1, 1.0 / workingInstr.Arg2),
+
                 Opcodes.IF_EQL => workingInstr.Arg1 == workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_NEQ => workingInstr.Arg1 != workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_LES => workingInstr.Arg1 < workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_LOE => workingInstr.Arg1 <= workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_GRT => workingInstr.Arg1 > workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_GOE => workingInstr.Arg1 >= workingInstr.Arg2 ? 1 : 0,
+
                 _ => throw new NotImplementedException($"Opcode {baseOpcode} not implemented")
             };
 

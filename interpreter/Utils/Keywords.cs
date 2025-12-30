@@ -37,6 +37,9 @@ namespace interpreter.Utils
                 ["ROL"] = Opcodes.ROL,
                 ["ROR"] = Opcodes.ROR,
 
+                ["POW"] = Opcodes.POW,
+                ["NRT"] = Opcodes.NRT,
+
                 ["WAIT"] = Opcodes.WAIT,
                 ["HALT"] = Opcodes.HALT,
                 ["CLEAR"] = Opcodes.CLEAR,
