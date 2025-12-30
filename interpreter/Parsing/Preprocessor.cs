@@ -28,99 +28,108 @@ namespace interpreter.Parsing
                 if (string.IsNullOrWhiteSpace(rawLine)) continue;
                 string processedLine = rawLine.Trim();
 
-                // Replace constants in instruction
-                string[] parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
-                for (int j = 0; j < parts.Length; j++)
+                // Split by ':' to support multiple instructions per line
+                string[] subInstructions = SplitterWithException(processedLine, splitChar: ':', exceptionChar: '\"');
+
+                for (int subIdx = 0; subIdx < subInstructions.Length; subIdx++)
                 {
-                    if (context.Macros.TryGetValue(parts[j], out string? value))
+                    string subInstruction = subInstructions[subIdx].Trim();
+                    if (string.IsNullOrWhiteSpace(subInstruction)) continue;
+
+                    // Replace constants in instruction
+                    string[] parts = SplitterWithException(subInstruction, splitChar: ' ', exceptionChar: '\"');
+                    for (int j = 0; j < parts.Length; j++)
                     {
-                        parts[j] = value;
-                    }
-                }
-                processedLine = string.Join(' ', parts);
-
-                processedLine = InstructionCompleter.CompleteInstruction(processedLine, i + 1);
-                
-                parts = SplitterWithException(processedLine, splitChar: ' ', exceptionChar: '\"');
-
-                // Convert keywords to Upper
-                for (int w = 0; w < parts.Length; w++)
-                {
-                    if (Keywords.list.ContainsKey(parts[w].ToUpper()))
-                    {
-                        parts[w] = parts[w].ToUpper();
-                    }
-                }
-
-                if (PragmaProcessor.ProcessPragma(parts, i + 1, currentSettings))
-                {
-                    continue;
-                }
-
-                if (instructionIndex > int.MaxValue)
-                {
-                    throw new Exception($"Program exceeds maximum of {int.MaxValue} instructions");
-                }
-
-                if (parts[0].Equals("#define", StringComparison.OrdinalIgnoreCase))
-                {
-                    ProcessMacro(parts, i + 1, context);
-                    continue;
-                }
-
-                if (parts[0].Equals("label", StringComparison.OrdinalIgnoreCase))
-                {
-                    ProcessLabel(parts, i + 1, context, instructionIndex);
-                    continue;
-                }
-
-                if (parts[0].Equals("subroutine", StringComparison.OrdinalIgnoreCase))
-                {
-                    ProcessSubroutine(parts, i + 1, context, instructionIndex);
-                    continue;
-                }
-
-                List<string> stringExpansions = StringPrintProcessor.ProcessStringPrint(parts, i + 1, currentSettings);
-                if (stringExpansions.Count > 0)
-                {
-                    for (int j = 0; j < stringExpansions.Count; j++)
-                    {
-                        string expansion = stringExpansions[j];
-
-                        if (PragmaProcessor.ProcessPragma(expansion.Split(' '), i + 1, currentSettings))
-                            continue;
-                        
-                        var expandedSettings = new ParserSettings
+                        if (context.Macros.TryGetValue(parts[j], out string? value))
                         {
-                            Overflow = currentSettings.Overflow,
-                            CharOutput = currentSettings.CharOutput,
-                            SignedMode = currentSettings.SignedMode,
-                            StringInput = currentSettings.StringInput
-                        };
-                        context.InstructionSettings.Add(expandedSettings);
-
-                        context.ProcesssedLines.Add(expansion);
-                        context.OriginalLineNumbers.Add(i + 1);
-                        instructionIndex++;
+                            parts[j] = value;
+                        }
                     }
-                    
-                    continue;
-                }
+                    subInstruction = string.Join(' ', parts);
 
-                var settingsSnapshot = new ParserSettings
-                {
-                    Overflow = currentSettings.Overflow,
-                    CharOutput = currentSettings.CharOutput,
-                    SignedMode = currentSettings.SignedMode,
-                    StringInput = currentSettings.StringInput
-                };
-                context.InstructionSettings.Add(settingsSnapshot);
-                
-                processedLine = string.Join(" ", parts);
-                context.ProcesssedLines.Add(processedLine);
-                
-                context.OriginalLineNumbers.Add(i + 1);
-                instructionIndex++;
+                    subInstruction = InstructionCompleter.CompleteInstruction(subInstruction, i + 1);
+                    
+                    parts = SplitterWithException(subInstruction, splitChar: ' ', exceptionChar: '\"');
+
+                    // Convert keywords to Upper
+                    for (int w = 0; w < parts.Length; w++)
+                    {
+                        if (Keywords.list.ContainsKey(parts[w].ToUpper()))
+                        {
+                            parts[w] = parts[w].ToUpper();
+                        }
+                    }
+
+                    if (PragmaProcessor.ProcessPragma(parts, i + 1, currentSettings))
+                    {
+                        continue;
+                    }
+
+                    if (instructionIndex > int.MaxValue)
+                    {
+                        throw new Exception($"Program exceeds maximum of {int.MaxValue} instructions");
+                    }
+
+                    if (parts[0].Equals("#define", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ProcessMacro(parts, i + 1, context);
+                        continue;
+                    }
+
+                    if (parts[0].Equals("label", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ProcessLabel(parts, i + 1, context, instructionIndex);
+                        continue;
+                    }
+
+                    if (parts[0].Equals("subroutine", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ProcessSubroutine(parts, i + 1, context, instructionIndex);
+                        continue;
+                    }
+
+                    List<string> stringExpansions = StringPrintProcessor.ProcessStringPrint(parts, i + 1, currentSettings);
+                    if (stringExpansions.Count > 0)
+                    {
+                        for (int j = 0; j < stringExpansions.Count; j++)
+                        {
+                            string expansion = stringExpansions[j];
+
+                            if (PragmaProcessor.ProcessPragma(expansion.Split(' '), i + 1, currentSettings))
+                                continue;
+                            
+                            var expandedSettings = new ParserSettings
+                            {
+                                Overflow = currentSettings.Overflow,
+                                CharOutput = currentSettings.CharOutput,
+                                SignedMode = currentSettings.SignedMode,
+                                StringInput = currentSettings.StringInput
+                            };
+                            context.InstructionSettings.Add(expandedSettings);
+
+                            context.ProcesssedLines.Add(expansion);
+                            context.OriginalLineNumbers.Add(i + 1);
+                            instructionIndex++;
+                        }
+                        
+                        continue;
+                    }
+
+                    var settingsSnapshot = new ParserSettings
+                    {
+                        Overflow = currentSettings.Overflow,
+                        CharOutput = currentSettings.CharOutput,
+                        SignedMode = currentSettings.SignedMode,
+                        StringInput = currentSettings.StringInput
+                    };
+                    context.InstructionSettings.Add(settingsSnapshot);
+                    
+                    subInstruction = string.Join(" ", parts);
+                    context.ProcesssedLines.Add(subInstruction);
+                    
+                    context.OriginalLineNumbers.Add(i + 1);
+                    instructionIndex++;
+                }
             }
 
             return context;
