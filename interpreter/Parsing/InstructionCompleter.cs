@@ -22,6 +22,16 @@ namespace interpreter.Parsing
                 expansion: ["CLEAR", "0", "0", "0"]
             ),
 
+            ["INC"] = new InstructionTemplate(
+                pattern: ["INC", "{SOURCE}"],
+                expansion: ["ADD", "{SOURCE}", "1", "{SOURCE}"]
+            ),
+
+            ["DEC"] = new InstructionTemplate(
+                pattern: ["DEC", "{SOURCE}"],
+                expansion: ["SUB", "{SOURCE}", "1", "{SOURCE}"]
+            ),
+
             ["COPY"] = new InstructionTemplate(
                 pattern: ["COPY", "{SOURCE}", "{DESTINATION}"],
                 expansion: ["ADD", "{SOURCE}", "0", "{DESTINATION}"]
