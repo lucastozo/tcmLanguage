@@ -16,7 +16,7 @@ namespace interpreter.Parsing
             }
 
             string[] otherVars = {
-                "ADDRESS",
+                "CURSOR",
                 "INPUT",
                 "OUTPUT",
                 "STACK",

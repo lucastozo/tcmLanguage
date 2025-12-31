@@ -11,7 +11,7 @@ namespace interpreter.Utils
             var dict = new Dictionary<string, byte>
             {
                 // ["REG0"] ... ["REGMAX"]
-                ["ADDRESS"] = REG_MAX + 1,
+                ["CURSOR"] = REG_MAX + 1,
 
                 ["COUNTER"] = REG_MAX + 2,
                 ["OUTPUT"] = REG_MAX + 3,

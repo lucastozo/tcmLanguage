@@ -51,9 +51,9 @@ namespace interpreter.Core
                 if (vm.UserStack.Count <= 0) throw EmptyStackException.UserStackEmpty();
                 return vm.UserStack.Pop();
             }
-            if (variableCode == Keywords.list["ADDRESS"]) return vm.Address;
-            if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Address];
-            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.InputRAM[vm.Address];
+            if (variableCode == Keywords.list["CURSOR"]) return vm.Cursor;
+            if (variableCode == Keywords.list["RAM"]) return vm.RAM[vm.Cursor];
+            if (variableCode == Keywords.list["INPUT_RAM"]) return vm.InputRAM[vm.Cursor];
             if (variableCode == Keywords.list["COUNTER"]) return (byte)vm.IP;
 
             throw InvalidStorageAreaException.ReadFailure(variableCode);
@@ -120,14 +120,14 @@ namespace interpreter.Core
                 vm.UserStack.Push(value);
                 return;
             }
-            if (variableCode == Keywords.list["ADDRESS"])
+            if (variableCode == Keywords.list["CURSOR"])
             {
-                vm.Address = value;
+                vm.Cursor = value;
                 return;
             }
             if (variableCode == Keywords.list["RAM"])
             {
-                vm.RAM[vm.Address] = value;
+                vm.RAM[vm.Cursor] = value;
                 return;
             }
             if (variableCode == Keywords.list["COUNTER"])
