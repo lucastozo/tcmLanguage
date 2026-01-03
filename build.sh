@@ -16,10 +16,10 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         exit 1
     fi
 	
-    mv ./dist/linux/tcmInterpreter ./dist/linux/tcmInterpreter-linux
+    mv ./dist/linux/PuckInterpreter ./dist/linux/PuckInterpreter-linux
 
     echo
-    echo "Linux executable: ./dist/linux/tcmInterpreter-linux"
+    echo "Linux executable: ./dist/linux/PuckInterpreter-linux"
 elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     echo "Building Windows (x64)..."
     rm -rf ./dist/windows
@@ -32,10 +32,10 @@ elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]];
         exit 1
     fi
 	
-    mv ./dist/windows/tcmInterpreter.exe ./dist/windows/tcmInterpreter-win.exe
+    mv ./dist/windows/PuckInterpreter.exe ./dist/windows/PuckInterpreter-win.exe
 
     echo
-    echo "Windows executable: ./dist/windows/tcmInterpreter-win.exe"
+    echo "Windows executable: ./dist/windows/PuckInterpreter-win.exe"
 else
     echo "Unsupported OS detected: $OSTYPE"
     exit 1

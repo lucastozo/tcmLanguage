@@ -10,7 +10,7 @@
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishAot>true</PublishAot>
-    <AssemblyName>tcmInterpreter</AssemblyName>
+    <AssemblyName>PuckInterpreter</AssemblyName>
   </PropertyGroup>
 
 </Project>
