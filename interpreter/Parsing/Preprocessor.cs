@@ -4,6 +4,9 @@ namespace interpreter.Parsing
 {
     public static class Preprocessor
     {
+        private const char CommentDelimiter = ';';
+        private const char MultiInstructionDelimiter = ':';
+
         public static ParserContext ProcessFile(string[] lines, ParserSettings settings)
         {
             var context = new ParserContext();
@@ -21,7 +24,7 @@ namespace interpreter.Parsing
             for (int i = 0; i < lines.Length; i++)
             {
                 string rawLine = lines[i];
-                int commentIndex = rawLine.IndexOf("//");
+                int commentIndex = rawLine.IndexOf(CommentDelimiter);
                 if (commentIndex >= 0)
                     rawLine = rawLine.Substring(0, commentIndex);
 
@@ -29,8 +32,7 @@ namespace interpreter.Parsing
                 string processedLine = rawLine.Trim();
 
                 // Split by ':' to support multiple instructions per line
-                string[] subInstructions = SplitterWithException(processedLine, splitChar: ':', exceptionChar: '\"');
-
+                string[] subInstructions = SplitterWithException(processedLine, splitChar: MultiInstructionDelimiter, exceptionChar: '\"');
                 for (int subIdx = 0; subIdx < subInstructions.Length; subIdx++)
                 {
                     string subInstruction = subInstructions[subIdx].Trim();
