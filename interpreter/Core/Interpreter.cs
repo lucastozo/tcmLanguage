@@ -8,6 +8,7 @@ namespace interpreter.Core
     {
         private VirtualMachine vm;
         private List<ParserSettings> instructionSettings;
+        private readonly Random rng = new Random();
 
         private enum LastInstructionConditional
         {
@@ -248,6 +249,8 @@ namespace interpreter.Core
                 Opcodes.POW => (int)Math.Pow(workingInstr.Arg1, workingInstr.Arg2),
                 Opcodes.NRT when workingInstr.Arg2 == 0 => throw new ArithmeticException("NRT with exponent 0"),
                 Opcodes.NRT => (int)Math.Pow(workingInstr.Arg1, 1.0 / workingInstr.Arg2),
+
+                Opcodes.RND => rng.Next(workingInstr.Arg1, workingInstr.Arg2 + 1),
 
                 Opcodes.IF_EQL => workingInstr.Arg1 == workingInstr.Arg2 ? 1 : 0,
                 Opcodes.IF_NEQ => workingInstr.Arg1 != workingInstr.Arg2 ? 1 : 0,

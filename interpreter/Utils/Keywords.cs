@@ -40,6 +40,8 @@ namespace interpreter.Utils
                 ["POW"] = Opcodes.POW,
                 ["NRT"] = Opcodes.NRT,
 
+                ["RND"] = Opcodes.RND,
+
                 ["WAIT"] = Opcodes.WAIT,
                 ["HALT"] = Opcodes.HALT,
                 ["CLEAR"] = Opcodes.CLEAR,

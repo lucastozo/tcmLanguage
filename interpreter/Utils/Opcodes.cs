@@ -18,6 +18,7 @@ namespace interpreter.Utils
         public const byte ROR = 11;
         public const byte POW = 12;
         public const byte NRT = 13; // Nth Root
+        public const byte RND = 14; // Random between A and B inclusive
         public const byte IF_EQL = 16;
         public const byte IF_NEQ = 17;
         public const byte IF_LES = 18;
