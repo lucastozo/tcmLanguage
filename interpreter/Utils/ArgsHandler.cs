@@ -1,9 +1,13 @@
 using System.Reflection;
+using System.Text;
 
 namespace interpreter.Utils
 {
     class ArgsHandler
     {
+        public static int VmCodePage {get; private set;}
+        public static Encoding VmEncoding { get; private set;} = Encoding.GetEncoding("iso-8859-1");
+        
         public static string Handle(string[] args)
         {
             if (args.Length == 0)
@@ -12,8 +16,10 @@ namespace interpreter.Utils
                 Environment.Exit(0);
             }
 
-            foreach (string arg in args)
+            for (int i = 0; i < args.Length; i++)
             {
+                string arg = args[i].ToLower();
+
                 switch (arg)
                 {
                     case "--help":
@@ -26,22 +32,41 @@ namespace interpreter.Utils
                         Console.WriteLine(GetVersion());
                         Environment.Exit(0);
                         break;
-                }
-            }
-
-            string filePath = args[0];
-            
-            for (int i = 1; i < args.Length; i++)
-            {
-                string arg = args[i].ToLower();
-                switch (arg)
-                {
+                    case "--encoding":
+                    case "-e":
+                        if (i + 1 < args.Length)
+                        {
+                            string encodingID = args[i + 1];
+                            try
+                            {
+                                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                                VmCodePage = Convert.ToInt32(encodingID);
+                                VmEncoding = Encoding.GetEncoding(VmCodePage); // validate
+                                i++;
+                            }
+                            catch (Exception)
+                            {
+                                Log.PrintError($"Invalid encoding identifier '{encodingID}'." +
+                                    " Please refer to https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers for valid identifiers.");
+                                Environment.Exit(1);
+                            }
+                        }
+                        else
+                        {
+                            Log.PrintError("No encoding specified after --encoding/-e option.");
+                            Environment.Exit(1);
+                        }
+                        break;
                     default:
-                        Log.PrintError($"Invalid option '{arg}'. Use -h or --help to get instructions");
+                        if (arg.StartsWith("-"))
+                        {
+                            Log.PrintError($"Invalid option '{arg}'. Use -h or --help to get instructions");
+                        }
                         break;
                 }
             }
 
+            string filePath = args[0];
             return filePath;
         }
 
@@ -54,6 +79,7 @@ namespace interpreter.Utils
             {
                 ("--help, -h", "Show this help message."),
                 ("--version, -v", "Show the installed version of the interpreter."),
+                ("--encoding, -e <encoding>", "Specify the file encoding (default is ISO-8859-1)."),
             };
 
             int width = 0;

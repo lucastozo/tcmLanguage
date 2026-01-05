@@ -2,6 +2,8 @@
 using interpreter.Parsing;
 using interpreter.Utils;
 
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
 string filePath = ArgsHandler.Handle(args);
 
 try

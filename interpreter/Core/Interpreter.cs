@@ -308,15 +308,16 @@ namespace interpreter.Core
 
                 if (charMode)
                 {
-                    Console.Write((char)vm.Output);
+                    char ch = ArgsHandler.VmEncoding.GetChars(new[] { (byte)vm.Output })[0];
+                    Console.Write(ch);
                 }
                 else if (signedMode)
                 {
-                    Console.WriteLine((sbyte)vm.Output);
+                    Console.WriteLine((sbyte)vm.Output); // Signed numbers
                 }
                 else
                 {
-                    Console.WriteLine(vm.Output);
+                    Console.WriteLine(vm.Output); // Only numbers
                 }
             }
         }
